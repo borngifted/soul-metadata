@@ -255,6 +255,119 @@
     vertical-align: middle;
   }
 
+  /* ---------- Name reading ---------- */
+  .ruling {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .ruling .r-num {
+    font-family: var(--serif);
+    font-size: 3rem;
+    color: var(--gold-bright);
+    line-height: 1;
+  }
+  .ruling .r-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.3rem;
+  }
+  .reading-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-width: 62ch;
+  }
+  .reading-list li {
+    padding: 10px 0 10px 22px;
+    position: relative;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .reading-list li:last-child { border-bottom: none; }
+  .reading-list li::before {
+    content: "◆";
+    position: absolute;
+    left: 0;
+    top: 12px;
+    color: var(--gold-dim);
+    font-size: 0.6rem;
+  }
+  .letter-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .letter-fact {
+    border: 1px solid var(--line-soft);
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 12px 14px;
+    font-size: 0.88rem;
+  }
+  .letter-fact .lf-label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .letter-fact strong { color: var(--gold-bright); font-weight: 600; }
+  .called-note {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin: 16px 0 0;
+    max-width: 62ch;
+  }
+
+  /* ---------- Harmony gauge ---------- */
+  .harmony-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .h-chip {
+    border: 1px solid var(--line-soft);
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 10px 14px;
+    flex: 1;
+    min-width: 160px;
+  }
+  .h-chip .hc-label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .h-chip .hc-value {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    color: var(--gold-bright);
+  }
+  .h-chip .hc-current { font-size: 0.8rem; color: var(--muted); }
+  .h-verdict {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold-bright);
+    white-space: nowrap;
+  }
+  .h-verdict.aligned { background: linear-gradient(180deg, #e3c26e, #c29a3f); color: #17130a; border: none; }
+  .h-verdict.harmonious { background: rgba(216, 180, 90, 0.14); }
+  .harmony-text { color: var(--text); max-width: 62ch; margin: 0 0 12px; }
+  .harmony-note { color: var(--muted); font-size: 0.85rem; margin: 0; max-width: 62ch; }
+
   /* ---------- Table ---------- */
   .table-scroll { overflow-x: auto; margin: 0 -22px; padding: 0 22px; }
   table {
@@ -421,12 +534,24 @@
     <input type="text" id="name" autocomplete="name" placeholder="e.g. TyQawn Curtis Headen" enterkeyhint="go" />
     <label for="dob">Date of birth</label>
     <input type="date" id="dob" />
+    <label for="called">Name you go by — optional</label>
+    <input type="text" id="called" autocomplete="nickname" placeholder="Nickname or the name people actually call you" enterkeyhint="go" />
     <button class="btn btn-primary" id="calc-btn" type="button">Decode the Pattern</button>
     <p class="error" id="form-error"></p>
   </section>
 
   <div id="results">
     <div class="hero-num reveal" id="hero"></div>
+
+    <section class="panel">
+      <h2 class="panel-title" id="fn-title">Name Reading</h2>
+      <div id="fn-body"></div>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel-title">Name · Birth Harmony</h2>
+      <div id="harmony-body"></div>
+    </section>
 
     <section class="panel">
       <h2 class="panel-title">Core Numbers</h2>
@@ -475,6 +600,7 @@
   <footer>
     <span class="eyebrow">Soul Metadata</span>
     This is a symbolic, numerological interpretation for reflection and entertainment — not scientific, legal, medical, financial, or psychological advice.
+    Name-harmony approach inspired by the Kabalarian Philosophy; all interpretations are original.
     <p style="margin-top:18px">
       <button class="btn" type="button" id="share-app-btn">Share this app</button>
     </p>
@@ -745,6 +871,141 @@
     19: { code: "19/1", text: "Self-reliance is the test. Lead without dominating; receive help without losing yourself." }
   };
 
+  // Short role phrases — used in the Pattern Statement and letter facts only.
+  var ROLES = {
+    1: "a self-starter's instinct", 2: "a diplomat's touch", 3: "a storyteller's spark",
+    4: "a builder's patience", 5: "a catalyst's restlessness", 6: "a guardian's devotion",
+    7: "a seeker's depth", 8: "an executive's command", 9: "a humanitarian's reach",
+    11: "a visionary's signal", 22: "an architect's scale", 33: "a healer's warmth"
+  };
+
+  // Day-to-day behavior — used in Deep Meaning only.
+  var BEHAVIOR = {
+    1: "In daily life it shows up as impatience with waiting: you'd rather make the call, take the hit, and adjust.",
+    2: "In daily life it shows up as timing: knowing when to speak, when to wait, and when a silence is doing the work.",
+    3: "In daily life it shows up as language: naming a feeling out loud is how it gets processed.",
+    4: "In daily life it shows up as systems: lists, routines, and finished checklists that calm the mind.",
+    5: "In daily life it shows up as motion: new places, new people, and several projects running at once.",
+    6: "In daily life it shows up as caretaking: noticing who hasn't eaten, who's struggling, who needs a call.",
+    7: "In daily life it shows up as research: going deep on whatever holds the attention, long after others stop.",
+    8: "In daily life it shows up as stewardship: budgets, plans, and results — keeping score because the score matters.",
+    9: "In daily life it shows up as perspective: talking people off ledges by widening the frame.",
+    11: "In daily life it shows up as reception: hunches, dreams, and first impressions that later prove right.",
+    22: "In daily life it shows up as blueprints: instinctively designing the bigger version of whatever is at hand.",
+    33: "In daily life it shows up as presence: people exhale around you and say things they've told no one."
+  };
+
+  // First-name reading — original interpretations in the direct, second-person
+  // style of classic name analysis. Keyed by the first name's ruling number.
+  var FIRSTNAME = {
+    1: [
+      "Your first name carries self-starting energy — you decide quickly, prefer to lead, and would rather build your own lane than wait in someone else's.",
+      "People experience you as direct and original; you're at your best when something new needs to be started.",
+      "Following routine drains you — you need room to act on your own judgment.",
+      "The growth edge: patience and partnership. Not every moment needs a first move."
+    ],
+    2: [
+      "Your first name carries sensitive, connecting energy — you feel the mood of a room before a word is spoken.",
+      "People bring you their real feelings because you listen without forcing solutions.",
+      "Conflict and harshness drain you faster than hard work ever will.",
+      "The growth edge: stating your own need as clearly as you sense everyone else's."
+    ],
+    3: [
+      "Your first name carries bright, expressive energy — words, humor, and imagery come naturally to you.",
+      "People experience you as uplifting company; you can lighten a heavy room.",
+      "Silence and isolation drain you — your thinking needs an audience or a page.",
+      "The growth edge: depth over sparkle. Finish the work behind the talent."
+    ],
+    4: [
+      "Your first name carries steady, methodical energy — you trust what is proven, built, and earned.",
+      "People rely on your word because you deliver exactly what you commit to.",
+      "Chaos and constant last-minute changes drain you.",
+      "The growth edge: flexibility. Not every change is a threat to the foundation."
+    ],
+    5: [
+      "Your first name carries restless, quick-thinking energy — you learn by moving, talking, and trying things firsthand.",
+      "People experience you as magnetic and persuasive, especially when the subject excites you.",
+      "Repetition drains you; variety, travel, and fresh problems recharge you.",
+      "The growth edge: follow-through. Charisma opens doors — consistency keeps them open."
+    ],
+    6: [
+      "Your first name carries warm, responsible energy — you naturally take charge of the wellbeing of the people around you.",
+      "People experience you as the dependable heart of the group, and they turn to you first in trouble.",
+      "Feeling unappreciated drains you more than the work itself ever does.",
+      "The growth edge: boundaries. You cannot pour from an empty vessel."
+    ],
+    7: [
+      "Your first name carries quiet, analytical energy — you need to understand a thing completely before you trust it.",
+      "People experience you as private and perceptive; you say less and notice more.",
+      "Crowds, noise, and small talk drain you — solitude is where you recharge.",
+      "The growth edge: sharing the wisdom. Insight kept private helps no one."
+    ],
+    8: [
+      "Your first name carries ambitious, executive energy — you instinctively see the value, the leverage, and the way to scale.",
+      "People experience you as capable and commanding, someone built for responsibility.",
+      "Feeling powerless or micromanaged drains you fastest.",
+      "The growth edge: softness. Influence built only on strength eventually isolates."
+    ],
+    9: [
+      "Your first name carries generous, wide-lens energy — you feel connected to causes and people far beyond your own circle.",
+      "People experience you as warm, wise, and a little unknowable.",
+      "Pettiness and small thinking drain you.",
+      "The growth edge: letting go. Endings are part of your design, not a failure of it."
+    ],
+    11: [
+      "Your first name carries high-voltage intuitive energy — impressions, ideas, and inspiration arrive faster than you can always explain.",
+      "People experience you as unusual in the best sense: a signal, not an echo.",
+      "Skeptical, dismissive environments drain you quickly.",
+      "The growth edge: grounding. Vision needs a container, a schedule, and a finished form."
+    ],
+    22: [
+      "Your first name carries master-builder energy — big vision paired with the practical instinct to actually construct it.",
+      "People experience you as quietly formidable: dreamer and engineer in one.",
+      "Small-stakes busywork drains you; you're built for large, long projects.",
+      "The growth edge: patience with the timeline. Cathedrals aren't rushed."
+    ],
+    33: [
+      "Your first name carries teacher-healer energy — people grow just from sustained contact with you.",
+      "People experience you as a safe harbor, and they seek you out in their hardest seasons.",
+      "Being needed constantly drains you if you never let yourself be held.",
+      "The growth edge: receiving. Service without replenishment becomes sacrifice."
+    ]
+  };
+
+  // Harmony currents — every number belongs to one of three currents.
+  var TRIAD = {
+    1: "mental", 5: "mental", 7: "mental",
+    2: "practical", 4: "practical", 8: "practical",
+    3: "expressive", 6: "expressive", 9: "expressive"
+  };
+
+  function triadOf(n) {
+    var d = n > 9 ? digitSum(n) : n;
+    while (d > 9) d = digitSum(d);
+    return TRIAD[d];
+  }
+
+  var HARMONY = {
+    aligned: {
+      label: "Aligned",
+      text: "Name and birth date move as one — the outer instrument is tuned to the inner assignment. What the path demands, the name already knows how to do."
+    },
+    harmonious: {
+      label: "In Harmony",
+      text: "Name and birth date run in the same current — different notes, same key. The name's talents feed the path's purpose with little translation needed."
+    },
+    cross: {
+      label: "Cross-Currents",
+      text: "Name and birth date pull in different currents. That friction isn't a flaw — it's a stretch: the name develops capacities the path alone would never build. The work is conscious integration, so the two currents take turns instead of fighting."
+    }
+  };
+
+  function harmonyLevel(nameNum, birthNum) {
+    if (nameNum === birthNum) return "aligned";
+    if (triadOf(nameNum) === triadOf(birthNum)) return "harmonious";
+    return "cross";
+  }
+
   /* ============ Interpretation ============ */
 
   function firstName(name) {
@@ -756,51 +1017,155 @@
     return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
+  // Each fact appears exactly once in the report: the table holds the
+  // reference meanings, so these paragraphs never quote them — they use
+  // essence and behavior instead, with guards for repeated numbers.
   function deepParagraphs(p) {
     var lp = p.lifePath, ex = p.expression, su = p.soulUrge, pe = p.personality, ma = p.maturity, bd = p.birthDay;
     var paras = [];
 
     paras.push(
       "The <strong>" + lp.display + " Life Path</strong> is the storyline this profile walks: " +
-      CORE[lp.final].essence + ". It sets the overall assignment — " +
-      LAYER_MEANINGS.lifePath[lp.final].charAt(0).toLowerCase() + LAYER_MEANINGS.lifePath[lp.final].slice(1)
+      CORE[lp.final].essence + ". " +
+      (lp.final === ex.final
+        ? "Every other number in the chart reports to this one."
+        : BEHAVIOR[lp.final])
     );
 
     paras.push(
-      "Layered on top is the <strong>" + ex.display + " Expression</strong>, drawn from every letter of the name. " +
-      "This is how the talents actually show up in the world: " + CORE[ex.final].essence + ". " +
+      "Layered on top is the <strong>" + ex.display + " Expression</strong>, drawn from every letter of the name — " +
+      "how the talents actually operate. " + BEHAVIOR[ex.final] + " " +
       (ex.isMaster
-        ? "As a master number it carries extra voltage — it receives more than it can always explain in the moment. The gift is vision; the challenge is grounding it into systems."
-        : "When this energy is given structure and repetition, it becomes the signature people know the name by.")
+        ? "As a master number it carries extra voltage: it receives more than it can always explain in the moment. The gift is vision; the challenge is grounding it into systems."
+        : "Given structure and repetition, this becomes the signature people know the name by.")
     );
 
     paras.push(
-      "Underneath it all, the <strong>" + su.display + " Soul Urge</strong> — calculated from the vowels — reveals what the heart is actually working for: " +
-      CORE[su.final].essence + ". This is the private engine behind the public moves."
+      "Underneath it all, the <strong>" + su.display + " Soul Urge</strong> — calculated from the vowels — is the private engine behind the public moves. " +
+      (su.final === lp.final
+        ? "Here the heart wants exactly what the path demands. When inner want and outer road agree, momentum comes easily; the only risk is never pausing to question the direction."
+        : "What the heart is actually working for: " + CORE[su.final].essence + ".")
     );
 
     paras.push(
-      "The <strong>" + pe.display + " Personality</strong>, drawn from the consonants, is the first impression — the outer garment. " +
-      LAYER_MEANINGS.personality[pe.final] + " The <strong>" + bd.display + " Birth Day</strong> adds a specific gift carried since day one: " +
-      LAYER_MEANINGS.birthDay[bd.final].charAt(0).toLowerCase() + LAYER_MEANINGS.birthDay[bd.final].slice(1)
+      "The <strong>" + pe.display + " Personality</strong>, drawn from the consonants, is the outer garment — the first read people get before they know the whole story. " +
+      (pe.final === ex.final
+        ? "It matches the deeper talent: there is no mask here — what people meet is what's really there."
+        : (pe.final === lp.final
+          ? "It moves the same way the path does, so the first impression is an honest preview of the whole journey."
+          : "It leads with " + ROLES[pe.final] + " before the deeper layers show.")) +
+      " The <strong>" + bd.display + " Birth Day</strong> sharpens the toolkit with a strain of " +
+      CORE[bd.final].keywords.toLowerCase() + "."
     );
 
     paras.push(
-      "The <strong>" + ma.display + " Maturity Number</strong> — Life Path plus Expression — points to where the whole pattern is heading: " +
-      CORE[ma.final].essence + ". " + LAYER_MEANINGS.maturity[ma.final]
+      "The <strong>" + ma.display + " Maturity Number</strong> — Life Path plus Expression — points to where the whole pattern is heading. " +
+      (ma.final === lp.final || ma.final === ex.final
+        ? "The destination deepens what is already in motion: the same current, fully mastered and finally at ease with itself."
+        : "The later chapters organize around " + CORE[ma.final].essence + ".")
     );
 
     return paras;
   }
 
   function patternStatement(p) {
-    var exT = CORE[p.expression.final].title.toLowerCase().replace(/^the /, "");
-    var lpK = CORE[p.lifePath.final].keywords.toLowerCase();
-    var suK = CORE[p.soulUrge.final].keywords.toLowerCase();
-    var peK = CORE[p.personality.final].keywords.toLowerCase();
-    return "A " + exT + " moving through a life of " + lpK + ". " +
-      "The inner drive is " + suK + ". The outer style is " + peK + ". " +
-      "The life lesson is to " + LESSONS[p.lifePath.final] + ".";
+    var lp = p.lifePath.final, ex = p.expression.final, su = p.soulUrge.final, pe = p.personality.final;
+    var parts = [];
+
+    parts.push(ex === lp
+      ? "This pattern is double-strength — name and birth date carry " + ROLES[ex] + " in the same direction."
+      : "This pattern pairs " + ROLES[ex] + " with " + ROLES[lp] + ".");
+
+    parts.push(su === ex || su === lp
+      ? "Underneath, the heart wants exactly what the pattern already does — rare agreement between want and design."
+      : "Underneath, the heart runs on " + ROLES[su] + ".");
+
+    parts.push(pe === ex || pe === lp || pe === su
+      ? "And there is no mask: the first impression is the true current."
+      : "The world first meets " + ROLES[pe] + ".");
+
+    parts.push("The lifelong assignment: " + LESSONS[lp] + ".");
+
+    return parts.join(" ");
+  }
+
+  /* ============ Name reading & harmony ============ */
+
+  function firstVowelOf(name) {
+    var letters = cleanLetters(name).split("");
+    for (var i = 0; i < letters.length; i++) {
+      if (isVowel(letters[i])) return letters[i].toUpperCase();
+    }
+    return null;
+  }
+
+  function nameReadingHTML(p) {
+    var fn = p.firstNameResult;
+    var html = "";
+
+    html += '<div class="ruling"><span class="r-num">' + esc(fn.display) + "</span>" +
+      '<span class="r-title">' + esc(CORE[fn.final].title) + "</span></div>";
+
+    html += '<ul class="reading-list">' + FIRSTNAME[fn.final].map(function (line) {
+      return "<li>" + esc(line) + "</li>";
+    }).join("") + "</ul>";
+
+    var cornerstone = cleanLetters(p.firstName).charAt(0).toUpperCase();
+    var cornerVal = letterValue(cornerstone);
+    var vowel = firstVowelOf(p.firstName);
+    var facts = [];
+    if (cornerstone) {
+      facts.push('<div class="letter-fact"><div class="lf-label">Cornerstone</div><strong>' +
+        esc(cornerstone) + " · " + cornerVal + "</strong> — the name opens on " + esc(ROLES[cornerVal]) + ".</div>");
+    }
+    if (vowel) {
+      facts.push('<div class="letter-fact"><div class="lf-label">First Vowel</div><strong>' +
+        esc(vowel) + " · " + letterValue(vowel) + "</strong> — emotion first moves with " + esc(ROLES[letterValue(vowel)]) + ".</div>");
+    }
+    if (p.surname && p.surnameResult) {
+      facts.push('<div class="letter-fact"><div class="lf-label">Family Name</div><strong>' +
+        esc(p.surname) + " · " + esc(p.surnameResult.display) + "</strong> — an inherited " +
+        esc(triadOf(p.surnameResult.final)) + "-current influence carried by the whole family line.</div>");
+    }
+    if (facts.length) html += '<div class="letter-facts">' + facts.join("") + "</div>";
+
+    if (p.calledName && p.calledResult) {
+      html += '<p class="called-note"><strong style="color:var(--gold-bright)">You go by “' + esc(p.calledName) + '” — ' +
+        esc(p.calledResult.display) + " · " + esc(CORE[p.calledResult.final].title) + ".</strong> " +
+        (p.calledResult.final === fn.final
+          ? "It carries the same ruling energy as the given name: the everyday self and the given self match."
+          : "The name people actually use is the one that shapes daily experience — day to day, this profile runs closer to " +
+            esc(ROLES[p.calledResult.final]) + " than the birth certificate suggests.") + "</p>";
+    } else {
+      html += '<p class="called-note">The name people actually call you shapes daily experience most — a middle or legal name only counts when it’s spoken. If you go by another name, add it above and decode again.</p>';
+    }
+
+    return html;
+  }
+
+  function harmonyHTML(p) {
+    var level = harmonyLevel(p.expression.final, p.lifePath.final);
+    var html = "";
+
+    html += '<div class="harmony-row">' +
+      '<div class="h-chip"><div class="hc-label">Expression — the name</div><div class="hc-value">' +
+      esc(p.expression.display) + '</div><div class="hc-current">' + esc(triadOf(p.expression.final)) + " current</div></div>" +
+      '<span class="h-verdict ' + level + '">' + HARMONY[level].label + "</span>" +
+      '<div class="h-chip"><div class="hc-label">Life Path — the birth date</div><div class="hc-value">' +
+      esc(p.lifePath.display) + '</div><div class="hc-current">' + esc(triadOf(p.lifePath.final)) + " current</div></div></div>";
+
+    html += '<p class="harmony-text">' + esc(HARMONY[level].text) + "</p>";
+
+    if (p.calledName && p.calledResult) {
+      var cl = harmonyLevel(p.calledResult.final, p.lifePath.final);
+      html += '<p class="harmony-text">The name you go by, “' + esc(p.calledName) + "” (" + esc(p.calledResult.display) + "), runs " +
+        (cl === "aligned" ? "fully aligned with" : cl === "harmonious" ? "in harmony with" : "across the current of") +
+        " the birth path" +
+        (cl === "cross" ? " — worth noticing which name you reach for when it matters most." : ".") + "</p>";
+    }
+
+    html += '<p class="harmony-note">Inspired by the Kabalarian view that a name serves best when it works in harmony with the purpose set at the date of birth. Numbers sharing a current (mental 1·5·7, practical 2·4·8, expressive 3·6·9) reinforce each other.</p>';
+    return html;
   }
 
   function karmicNotes(p) {
@@ -827,12 +1192,19 @@
 
   /* ============ Profile computation ============ */
 
-  function computeProfile(name, dobISO) {
+  function computeProfile(name, dobISO, calledName) {
     // dobISO: YYYY-MM-DD
     var parts = dobISO.split("-");
     var dob = { yyyy: parts[0], mm: parts[1], dd: parts[2] };
     var lifePath = calcLifePath(dob);
     var expression = calcExpression(name);
+
+    var words = name.trim().split(/\s+/).filter(function (w) { return cleanLetters(w); });
+    var firstName = words[0] || name.trim();
+    var surname = words.length > 1 ? words[words.length - 1] : null;
+    var called = (calledName || "").trim();
+    if (!cleanLetters(called)) called = null;
+
     return {
       name: name.trim(),
       dobISO: dobISO,
@@ -842,7 +1214,13 @@
       expression: expression,
       soulUrge: calcSoulUrge(name),
       personality: calcPersonality(name),
-      maturity: calcMaturity(lifePath, expression)
+      maturity: calcMaturity(lifePath, expression),
+      firstName: firstName,
+      firstNameResult: calcExpression(firstName),
+      surname: surname,
+      surnameResult: surname ? calcExpression(surname) : null,
+      calledName: called,
+      calledResult: called ? calcExpression(called) : null
     };
   }
 
@@ -864,6 +1242,10 @@
       '<span class="big">' + esc(String(p.lifePath.final)) + "</span>" +
       '<span class="big-title">' + esc(CORE[p.lifePath.final].title) + "</span>" +
       '<p class="subject">' + esc(p.name) + " · " + esc(p.dobPretty) + "</p>";
+
+    document.getElementById("fn-title").textContent = "Name Reading — " + p.firstName;
+    document.getElementById("fn-body").innerHTML = nameReadingHTML(p);
+    document.getElementById("harmony-body").innerHTML = harmonyHTML(p);
 
     var grid = document.getElementById("num-grid");
     grid.innerHTML = LAYER_DEFS.map(function (d) {
@@ -912,6 +1294,17 @@
     var lines = [];
     lines.push("SOUL METADATA — NUMEROLOGY PROFILE");
     lines.push(p.name + " · " + p.dobPretty + " · Pythagorean system");
+    lines.push("");
+    lines.push("NAME READING — " + p.firstName + " (" + p.firstNameResult.display + " · " + CORE[p.firstNameResult.final].title + ")");
+    FIRSTNAME[p.firstNameResult.final].forEach(function (line) { lines.push("   • " + line); });
+    if (p.calledName && p.calledResult) {
+      lines.push("   Goes by \"" + p.calledName + "\": " + p.calledResult.display + " — " + CORE[p.calledResult.final].title);
+    }
+    lines.push("");
+    var hl = harmonyLevel(p.expression.final, p.lifePath.final);
+    lines.push("NAME · BIRTH HARMONY: " + HARMONY[hl].label.toUpperCase() +
+      " (Expression " + p.expression.display + " " + triadOf(p.expression.final) +
+      " current vs Life Path " + p.lifePath.display + " " + triadOf(p.lifePath.final) + " current)");
     lines.push("");
     LAYER_DEFS.forEach(function (d) {
       var r = p[d[0]];
@@ -1087,7 +1480,8 @@
       load.addEventListener("click", function () {
         document.getElementById("name").value = item.name;
         document.getElementById("dob").value = item.dob;
-        render(computeProfile(item.name, item.dob));
+        document.getElementById("called").value = item.called || "";
+        render(computeProfile(item.name, item.dob, item.called || ""));
       });
 
       var del = document.createElement("button");
@@ -1127,14 +1521,15 @@
   function handleCalculate() {
     var name = document.getElementById("name").value;
     var dob = document.getElementById("dob").value;
+    var called = document.getElementById("called").value;
     if (!cleanLetters(name)) { showError("Enter a full name using letters A–Z."); return; }
     if (!dob) { showError("Enter a date of birth."); return; }
     showError("");
-    render(computeProfile(name, dob));
+    render(computeProfile(name, dob, called));
   }
 
   document.getElementById("calc-btn").addEventListener("click", handleCalculate);
-  ["name", "dob"].forEach(function (id) {
+  ["name", "dob", "called"].forEach(function (id) {
     document.getElementById(id).addEventListener("keydown", function (e) {
       if (e.key === "Enter") handleCalculate();
     });
@@ -1206,7 +1601,7 @@
     var list = loadProfiles();
     var exists = list.some(function (i) { return i.name === current.name && i.dob === current.dobISO; });
     if (!exists) {
-      list.unshift({ name: current.name, dob: current.dobISO });
+      list.unshift({ name: current.name, dob: current.dobISO, called: current.calledName || "" });
       if (list.length > 20) list.length = 20;
       if (!saveProfiles(list)) { toast("Saving isn’t available in this browser"); return; }
     }
@@ -1234,7 +1629,12 @@
     computeProfile: computeProfile,
     reportText: reportText,
     patternStatement: patternStatement,
-    karmicNotes: karmicNotes
+    karmicNotes: karmicNotes,
+    deepParagraphs: deepParagraphs,
+    harmonyLevel: harmonyLevel,
+    triadOf: triadOf,
+    nameReadingHTML: nameReadingHTML,
+    harmonyHTML: harmonyHTML
   };
 
   renderProfiles();
