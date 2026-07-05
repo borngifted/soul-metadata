@@ -119,6 +119,103 @@
     gap: 10px;
   }
   .date-row input { text-align: center; font-variant-numeric: tabular-nums; }
+  .time-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr 2.6fr;
+    gap: 10px;
+  }
+  .time-row input { text-align: center; font-variant-numeric: tabular-nums; }
+  select {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--line-soft);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    padding: 13px 8px;
+    outline: none;
+    min-height: 48px;
+  }
+  select:focus-visible { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold-dim); }
+  .check-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .check-row input { accent-color: var(--gold); width: 16px; height: 16px; }
+
+  /* ---------- Human Design ---------- */
+  .hd-type {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .hd-type .ht-name {
+    font-family: var(--serif);
+    font-size: 2.2rem;
+    color: var(--gold-bright);
+    line-height: 1.1;
+  }
+  .hd-type .ht-profile {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--text);
+  }
+  .hd-lede { color: var(--text); max-width: 62ch; margin: 0 0 18px; }
+  .hd-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .hd-card {
+    border: 1px solid var(--line-soft);
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 12px 14px;
+    font-size: 0.9rem;
+  }
+  .hd-card .hd-label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .hd-card strong { color: var(--gold-bright); font-weight: 600; display: block; margin-bottom: 4px; }
+  .centers-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .center-chip {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    padding: 8px 14px;
+    border: 1px solid var(--line-soft);
+    color: var(--muted);
+  }
+  .center-chip.on {
+    border-color: var(--gold-dim);
+    background: rgba(216, 180, 90, 0.14);
+    color: var(--gold-bright);
+  }
+  .hd-note { color: var(--muted); font-size: 0.82rem; margin: 14px 0 0; max-width: 62ch; }
   input[type="text"], input[type="date"] {
     width: 100%;
     background: rgba(0, 0, 0, 0.35);
@@ -546,6 +643,14 @@
     </div>
     <label for="called">Name you go by — optional</label>
     <input type="text" id="called" autocomplete="nickname" placeholder="Nickname or the name people actually call you" enterkeyhint="go" />
+    <label for="bt-h">Birth time — for the Human Design chart</label>
+    <div class="time-row">
+      <input type="text" id="bt-h" inputmode="numeric" maxlength="2" placeholder="HH" aria-label="Birth hour" />
+      <input type="text" id="bt-min" inputmode="numeric" maxlength="2" placeholder="MM" aria-label="Birth minute" />
+      <select id="bt-ap" aria-label="AM or PM"><option>AM</option><option>PM</option></select>
+      <select id="bt-tz" aria-label="Time zone at birth"></select>
+    </div>
+    <label class="check-row"><input type="checkbox" id="bt-unknown" /> I don't know my birth time (uses 12:00 noon — some chart details may shift)</label>
     <button class="btn btn-primary" id="calc-btn" type="button">Decode the Pattern</button>
     <p class="error" id="form-error"></p>
   </section>
@@ -566,6 +671,11 @@
     <section class="panel">
       <h2 class="panel-title">Name · Birth Harmony</h2>
       <div id="harmony-body"></div>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel-title">Human Design Chart</h2>
+      <div id="hd-body"></div>
     </section>
 
     <section class="panel">
@@ -741,6 +851,277 @@
       tail += " → " + s;
     });
     return tail;
+  }
+
+  /* ============ Human Design engine ============
+     Computes the bodygraph from planetary positions at birth (Personality)
+     and at the moment the Sun was exactly 88° of arc earlier (Design),
+     using a compact built-in ephemeris. Tropical zodiac, mean lunar node. */
+
+  var D2R = Math.PI / 180;
+  function norm360(x) { x = x % 360; return x < 0 ? x + 360 : x; }
+  function sind(x) { return Math.sin(x * D2R); }
+  function cosd(x) { return Math.cos(x * D2R); }
+
+  function julianDay(y, m, d, utHours) {
+    if (m <= 2) { y -= 1; m += 12; }
+    var A = Math.floor(y / 100);
+    var B = 2 - A + Math.floor(A / 4);
+    return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5 + utHours / 24;
+  }
+
+  function sunLongitude(jd) {
+    var T = (jd - 2451545.0) / 36525.0;
+    var L0 = norm360(280.46646 + 36000.76983 * T + 0.0003032 * T * T);
+    var M = norm360(357.52911 + 35999.05029 * T - 0.0001537 * T * T);
+    var C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * sind(M) +
+            (0.019993 - 0.000101 * T) * sind(2 * M) +
+            0.000289 * sind(3 * M);
+    return norm360(L0 + C - 0.00569); // apparent (aberration), nutation ignored
+  }
+
+  function moonLongitude(jd) {
+    var T = (jd - 2451545.0) / 36525.0;
+    var Lp = norm360(218.3164477 + 481267.88123421 * T - 0.0015786 * T * T);
+    var D = norm360(297.8501921 + 445267.1114034 * T - 0.0018819 * T * T);
+    var M = norm360(357.5291092 + 35999.0502909 * T);
+    var Mp = norm360(134.9633964 + 477198.8675055 * T + 0.0087414 * T * T);
+    var F = norm360(93.2720950 + 483202.0175233 * T - 0.0036539 * T * T);
+    var E = 1 - 0.002516 * T;
+    var s = 0;
+    s += 6.288774 * sind(Mp);
+    s += 1.274027 * sind(2 * D - Mp);
+    s += 0.658314 * sind(2 * D);
+    s += 0.213618 * sind(2 * Mp);
+    s -= 0.185116 * E * sind(M);
+    s -= 0.114332 * sind(2 * F);
+    s += 0.058793 * sind(2 * D - 2 * Mp);
+    s += 0.057066 * E * sind(2 * D - M - Mp);
+    s += 0.053322 * sind(2 * D + Mp);
+    s += 0.045758 * E * sind(2 * D - M);
+    s -= 0.040923 * E * sind(M - Mp);
+    s -= 0.034720 * sind(D);
+    s -= 0.030383 * E * sind(M + Mp);
+    s += 0.015327 * sind(2 * D - 2 * F);
+    s -= 0.012528 * sind(Mp + 2 * F);
+    s += 0.010980 * sind(Mp - 2 * F);
+    return norm360(Lp + s);
+  }
+
+  function meanNodeLongitude(jd) {
+    var T = (jd - 2451545.0) / 36525.0;
+    return norm360(125.04452 - 1934.136261 * T + 0.0020708 * T * T);
+  }
+
+  // Keplerian elements (J2000 values + per-century rates), valid ~1800-2050:
+  // [a, e, I, L, longPeri, longNode] and rates in the same order.
+  var PLANET_ELEMENTS = {
+    mercury: [[0.38709927, 0.20563593, 7.00497902, 252.25032350, 77.45779628, 48.33076593],
+              [0.00000037, 0.00001906, -0.00594749, 149472.67411175, 0.16047689, -0.12534081]],
+    venus:   [[0.72333566, 0.00677672, 3.39467605, 181.97909950, 131.60246718, 76.67984255],
+              [0.00000390, -0.00004107, -0.00078890, 58517.81538729, 0.00268329, -0.27769418]],
+    earth:   [[1.00000261, 0.01671123, -0.00001531, 100.46457166, 102.93768193, 0.0],
+              [0.00000562, -0.00004392, -0.01294668, 35999.37244981, 0.32327364, 0.0]],
+    mars:    [[1.52371034, 0.09339410, 1.84969142, -4.55343205, -23.94362959, 49.55953891],
+              [0.00001847, 0.00007882, -0.00813131, 19140.30268499, 0.44441088, -0.29257343]],
+    jupiter: [[5.20288700, 0.04838624, 1.30439695, 34.39644051, 14.72847983, 100.47390909],
+              [-0.00011607, -0.00013253, -0.00183714, 3034.74612775, 0.21252668, 0.20469106]],
+    saturn:  [[9.53667594, 0.05386179, 2.48599187, 49.95424423, 92.59887831, 113.66242448],
+              [-0.00125060, -0.00050991, 0.00193609, 1222.49362201, -0.41897216, -0.28867794]],
+    uranus:  [[19.18916464, 0.04725744, 0.77263783, 313.23810451, 170.95427630, 74.01692503],
+              [-0.00196176, -0.00004397, -0.00242939, 428.48202785, 0.40805281, 0.04240589]],
+    neptune: [[30.06992276, 0.00859048, 1.77004347, -55.12002969, 44.96476227, 131.78422574],
+              [0.00026291, 0.00005105, 0.00035372, 218.45945325, -0.32241464, -0.00508664]],
+    pluto:   [[39.48211675, 0.24882730, 17.14001206, 238.92903833, 224.06891629, 110.30393684],
+              [-0.00031596, 0.00005170, 0.00004818, 145.20780515, -0.04062942, -0.01183482]]
+  };
+
+  function heliocentricXYZ(body, jd) {
+    var T = (jd - 2451545.0) / 36525.0;
+    var el = PLANET_ELEMENTS[body];
+    var a = el[0][0] + el[1][0] * T;
+    var e = el[0][1] + el[1][1] * T;
+    var I = el[0][2] + el[1][2] * T;
+    var L = el[0][3] + el[1][3] * T;
+    var lp = el[0][4] + el[1][4] * T;
+    var ln = el[0][5] + el[1][5] * T;
+    var M = norm360(L - lp);
+    var w = lp - ln;
+    var Erad = M * D2R;
+    var eStar = e;
+    for (var i = 0; i < 8; i++) {
+      Erad = Erad - (Erad - eStar * Math.sin(Erad) - M * D2R) / (1 - eStar * Math.cos(Erad));
+    }
+    var xp = a * (Math.cos(Erad) - e);
+    var yp = a * Math.sqrt(1 - e * e) * Math.sin(Erad);
+    var cw = cosd(w), sw = sind(w), cn = cosd(ln), sn = sind(ln), ci = cosd(I), si = sind(I);
+    var x = (cw * cn - sw * sn * ci) * xp + (-sw * cn - cw * sn * ci) * yp;
+    var y = (cw * sn + sw * cn * ci) * xp + (-sw * sn + cw * cn * ci) * yp;
+    var z = (sw * si) * xp + (cw * si) * yp;
+    return [x, y, z];
+  }
+
+  function planetLongitude(body, jd) {
+    var p = heliocentricXYZ(body, jd);
+    var e = heliocentricXYZ("earth", jd);
+    return norm360(Math.atan2(p[1] - e[1], p[0] - e[0]) / D2R);
+  }
+
+  // Solve for the moment the Sun was exactly `arc` degrees before natal Sun.
+  function designJulianDay(birthJD) {
+    var target = norm360(sunLongitude(birthJD) - 88);
+    var jd = birthJD - 88.5; // Sun moves ~0.9856°/day
+    for (var i = 0; i < 8; i++) {
+      var diff = sunLongitude(jd) - target;
+      diff = ((diff + 540) % 360) - 180;
+      jd -= diff / 0.9856;
+    }
+    return jd;
+  }
+
+  /* --- Gate wheel: 64 gates of 5.625°, Gate 41 starts at 302° (2° Aquarius) --- */
+  var GATE_WHEEL = [41, 19, 13, 49, 30, 55, 37, 63, 22, 36, 25, 17, 21, 51, 42, 3,
+                    27, 24, 2, 23, 8, 20, 16, 35, 45, 12, 15, 52, 39, 53, 62, 56,
+                    31, 33, 7, 4, 29, 59, 40, 64, 47, 6, 46, 18, 48, 57, 32, 50,
+                    28, 44, 1, 43, 14, 34, 9, 5, 26, 11, 10, 58, 38, 54, 61, 60];
+
+  function gateLine(lon) {
+    var x = norm360(lon - 302);
+    var idx = Math.floor(x / 5.625) % 64;
+    var line = Math.floor((x % 5.625) / 0.9375) + 1;
+    return { gate: GATE_WHEEL[idx], line: line };
+  }
+
+  var HD_CENTERS = {
+    Head: [61, 63, 64],
+    Ajna: [4, 11, 17, 24, 43, 47],
+    Throat: [8, 12, 16, 20, 23, 31, 33, 35, 45, 56, 62],
+    "G Center": [1, 2, 7, 10, 13, 15, 25, 46],
+    Heart: [21, 26, 40, 51],
+    Sacral: [3, 5, 9, 14, 27, 29, 34, 42, 59],
+    Spleen: [18, 28, 32, 44, 48, 50, 57],
+    "Solar Plexus": [6, 22, 30, 36, 37, 49, 55],
+    Root: [19, 38, 39, 41, 52, 53, 54, 58, 60]
+  };
+
+  var HD_CHANNELS = [
+    [1, 8], [2, 14], [3, 60], [4, 63], [5, 15], [6, 59], [7, 31], [9, 52],
+    [10, 20], [10, 34], [10, 57], [11, 56], [12, 22], [13, 33], [16, 48],
+    [17, 62], [18, 58], [19, 49], [20, 34], [20, 57], [21, 45], [23, 43],
+    [24, 61], [25, 51], [26, 44], [27, 50], [28, 38], [29, 46], [30, 41],
+    [32, 54], [34, 57], [35, 36], [37, 40], [39, 55], [42, 53], [47, 64]
+  ];
+
+  var GATE_CENTER = {};
+  Object.keys(HD_CENTERS).forEach(function (c) {
+    HD_CENTERS[c].forEach(function (g) { GATE_CENTER[g] = c; });
+  });
+
+  var HD_BODIES = ["Sun", "Earth", "Moon", "North Node", "South Node", "Mercury",
+                   "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
+
+  function chartActivations(jd) {
+    var sun = sunLongitude(jd);
+    var node = meanNodeLongitude(jd);
+    var lons = {
+      "Sun": sun,
+      "Earth": norm360(sun + 180),
+      "Moon": moonLongitude(jd),
+      "North Node": node,
+      "South Node": norm360(node + 180),
+      "Mercury": planetLongitude("mercury", jd),
+      "Venus": planetLongitude("venus", jd),
+      "Mars": planetLongitude("mars", jd),
+      "Jupiter": planetLongitude("jupiter", jd),
+      "Saturn": planetLongitude("saturn", jd),
+      "Uranus": planetLongitude("uranus", jd),
+      "Neptune": planetLongitude("neptune", jd),
+      "Pluto": planetLongitude("pluto", jd)
+    };
+    var out = {};
+    HD_BODIES.forEach(function (b) { out[b] = gateLine(lons[b]); });
+    return out;
+  }
+
+  function computeHumanDesign(dobISO, hour24, minute, utcOffsetHours) {
+    var p = dobISO.split("-");
+    var utHours = hour24 + minute / 60 - utcOffsetHours;
+    var birthJD = julianDay(Number(p[0]), Number(p[1]), Number(p[2]), utHours);
+    var designJD = designJulianDay(birthJD);
+
+    var personality = chartActivations(birthJD);
+    var design = chartActivations(designJD);
+
+    var gates = {};
+    HD_BODIES.forEach(function (b) {
+      gates[personality[b].gate] = true;
+      gates[design[b].gate] = true;
+    });
+
+    var channels = HD_CHANNELS.filter(function (ch) { return gates[ch[0]] && gates[ch[1]]; });
+
+    var defined = {};
+    channels.forEach(function (ch) {
+      defined[GATE_CENTER[ch[0]]] = true;
+      defined[GATE_CENTER[ch[1]]] = true;
+    });
+    var definedList = Object.keys(HD_CENTERS).filter(function (c) { return defined[c]; });
+
+    // Connected components over defined centers via defined channels
+    var adj = {};
+    definedList.forEach(function (c) { adj[c] = {}; });
+    channels.forEach(function (ch) {
+      var a = GATE_CENTER[ch[0]], b = GATE_CENTER[ch[1]];
+      if (a !== b) { adj[a][b] = true; adj[b][a] = true; }
+    });
+    var compOf = {}, comps = 0;
+    definedList.forEach(function (c) {
+      if (compOf[c] !== undefined) return;
+      comps++;
+      var stack = [c];
+      while (stack.length) {
+        var cur = stack.pop();
+        if (compOf[cur] !== undefined) continue;
+        compOf[cur] = comps;
+        Object.keys(adj[cur] || {}).forEach(function (n) { if (compOf[n] === undefined) stack.push(n); });
+      }
+    });
+
+    var sacral = !!defined["Sacral"];
+    var motors = ["Sacral", "Heart", "Solar Plexus", "Root"];
+    var motorToThroat = !!defined["Throat"] && motors.some(function (m) {
+      return defined[m] && compOf[m] === compOf["Throat"];
+    });
+
+    var type;
+    if (definedList.length === 0) type = "Reflector";
+    else if (sacral) type = motorToThroat ? "Manifesting Generator" : "Generator";
+    else if (motorToThroat) type = "Manifestor";
+    else type = "Projector";
+
+    var authority;
+    if (type === "Reflector") authority = "Lunar";
+    else if (defined["Solar Plexus"]) authority = "Emotional";
+    else if (defined["Sacral"]) authority = "Sacral";
+    else if (defined["Spleen"]) authority = "Splenic";
+    else if (defined["Heart"]) authority = compOf["Heart"] === compOf["Throat"] ? "Ego (Manifested)" : "Ego (Projected)";
+    else if (defined["G Center"]) authority = "Self-Projected";
+    else authority = "Mental / Environment";
+
+    var definition = ["None", "Single", "Split", "Triple Split", "Quadruple Split"][Math.min(comps, 4)];
+
+    return {
+      type: type,
+      authority: authority,
+      profile: personality["Sun"].line + "/" + design["Sun"].line,
+      definition: definition,
+      definedCenters: definedList,
+      channels: channels,
+      personality: personality,
+      design: design,
+      birthJD: birthJD,
+      designJD: designJD
+    };
   }
 
   /* ============ Meaning library ============ */
@@ -1016,6 +1397,124 @@
     return "cross";
   }
 
+  /* ============ Human Design meanings (original text) ============ */
+
+  var HD_TYPES = {
+    "Generator": {
+      tag: "The Life Force",
+      strategy: "To Respond",
+      notSelf: "Frustration",
+      signature: "Satisfaction",
+      lede: "A defined Sacral gives this design steady, renewable energy for work it truly cares about. Life works best pulled, not pushed: instead of chasing, let opportunities present themselves and follow the gut's yes or no. When the response is honored, energy feels endless; when it's overridden, frustration is the signal to course-correct."
+    },
+    "Manifesting Generator": {
+      tag: "The Multi-Passionate Builder",
+      strategy: "To Respond, then Inform",
+      notSelf: "Frustration & Anger",
+      signature: "Satisfaction",
+      lede: "Sacral power wired straight through to expression: fast, multi-track, built to skip steps others need. The design works by responding first, then informing the people affected before acting. Dropping projects that stop feeling alive isn't quitting — it's how this energy is meant to move."
+    },
+    "Manifestor": {
+      tag: "The Initiator",
+      strategy: "To Inform",
+      notSelf: "Anger",
+      signature: "Peace",
+      lede: "One of the few designs built to start things from pure internal impulse — no waiting required. The catch is impact: moves land on other people before they see them coming, so informing before acting clears resistance the way headlights clear a dark road. Freedom to initiate, at peace, is the mark of this design working."
+    },
+    "Projector": {
+      tag: "The Guide",
+      strategy: "Wait for the Invitation",
+      notSelf: "Bitterness",
+      signature: "Success",
+      lede: "Designed to see systems and people more clearly than they see themselves — a manager of energy rather than a generator of it. The gifts land when they're recognized and invited, not volunteered; rest is productive, and guidance offered uninvited tends to bounce. Recognition first, then the wisdom flows."
+    },
+    "Reflector": {
+      tag: "The Mirror",
+      strategy: "Wait a Lunar Cycle",
+      notSelf: "Disappointment",
+      signature: "Surprise",
+      lede: "With no fixed centers, this rare design samples and reflects the health of its environment — a living barometer of the community around it. Big decisions ripen over a full lunar cycle (about 28 days) as the chart tastes every flavor of the question. The right places and right people are everything."
+    }
+  };
+
+  var HD_AUTHORITIES = {
+    "Emotional": "Clarity comes as a wave, not a moment — never decide at the peak or the dip. Sleep on it, feel it from several emotional weathers, and the true yes survives the ride.",
+    "Sacral": "The gut answers in real time — an expanding \"uh-huh\" or a contracting \"uh-uh\" that arrives before thought. Yes/no questions unlock it; analysis afterward just narrates the decision already made.",
+    "Splenic": "A quiet, once-only whisper in the moment — instinct about safety, timing, and wellbeing. It doesn't repeat itself, so the practice is catching the first hit before the mind talks over it.",
+    "Ego (Manifested)": "Truth surfaces in what gets said spontaneously — the will speaks its commitments out loud. If the heart isn't in it, the voice gives it away.",
+    "Ego (Projected)": "Decisions run on willpower and honest self-interest: what do *I* want, and do I have the heart to see it through? Promises are sacred here — make few, keep all.",
+    "Self-Projected": "Clarity comes from hearing yourself talk it out with people you trust. The direction is in the sound of your own voice — listen to what you say, not what you conclude.",
+    "Mental / Environment": "No inner body-compass — clarity assembles from talking things through in the right environments. The decision is never in the head alone; it's in how the whole system feels from place to place.",
+    "Lunar": "Time is the authority: a full lunar cycle around any major decision, watching how it feels as the moon moves the chart through every configuration."
+  };
+
+  var HD_LINES = {
+    1: "Investigator", 2: "Hermit", 3: "Experimenter",
+    4: "Opportunist", 5: "Heretic", 6: "Role Model"
+  };
+
+  var HD_CENTER_MEANINGS = {
+    "Head": "inspiration & mental pressure",
+    "Ajna": "concepts & certainty",
+    "Throat": "expression & manifestation",
+    "G Center": "identity & direction",
+    "Heart": "willpower & worth",
+    "Sacral": "life-force & work energy",
+    "Spleen": "instinct, timing & wellbeing",
+    "Solar Plexus": "emotions & desire",
+    "Root": "drive & adrenaline pressure"
+  };
+
+  function hdHTML(hd, timeKnown) {
+    var t = HD_TYPES[hd.type];
+    var profLines = hd.profile.split("/");
+    var html = "";
+
+    html += '<div class="hd-type"><span class="ht-name">' + esc(hd.type) + "</span>" +
+      '<span class="ht-profile">' + esc(hd.profile) + " — " +
+      esc(HD_LINES[Number(profLines[0])]) + " / " + esc(HD_LINES[Number(profLines[1])]) + "</span></div>";
+    html += '<p class="hd-lede">' + esc(t.lede) + "</p>";
+
+    html += '<div class="hd-cards">' +
+      '<div class="hd-card"><div class="hd-label">Strategy</div><strong>' + esc(t.strategy) + "</strong></div>" +
+      '<div class="hd-card"><div class="hd-label">Authority</div><strong>' + esc(hd.authority) + "</strong>" +
+        esc(HD_AUTHORITIES[hd.authority] || "") + "</div>" +
+      '<div class="hd-card"><div class="hd-label">Definition</div><strong>' + esc(hd.definition) + "</strong></div>" +
+      '<div class="hd-card"><div class="hd-label">Signature / Not-Self</div><strong>' +
+        esc(t.signature) + " / " + esc(t.notSelf) + "</strong>Feeling " + esc(t.notSelf.toLowerCase()) +
+        " is the sign of forcing; " + esc(t.signature.toLowerCase()) + " means the strategy is working.</div>" +
+      "</div>";
+
+    html += '<div class="hd-label" style="font-family:var(--mono);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Centers</div>';
+    html += '<div class="centers-grid">' + Object.keys(HD_CENTERS).map(function (c) {
+      var on = hd.definedCenters.indexOf(c) !== -1;
+      return '<span class="center-chip' + (on ? " on" : "") + '" title="' + esc(HD_CENTER_MEANINGS[c]) + '">' +
+        esc(c) + (on ? " ●" : " ○") + "</span>";
+    }).join("") + "</div>";
+    html += '<p class="harmony-note">● defined — consistent, reliable energy you broadcast. ○ open — where you take in and amplify others; wisdom over time, pressure in the meantime.</p>';
+
+    if (hd.channels.length) {
+      html += '<div class="hd-label" style="font-family:var(--mono);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px">Channels</div>';
+      html += '<div class="centers-grid">' + hd.channels.map(function (ch) {
+        return '<span class="center-chip on">' + ch[0] + "–" + ch[1] + " · " +
+          esc(GATE_CENTER[ch[0]]) + "↔" + esc(GATE_CENTER[ch[1]]) + "</span>";
+      }).join("") + "</div>";
+    }
+
+    html += '<div class="table-scroll" style="margin-top:18px"><table><thead><tr><th>Body</th><th>Personality</th><th>Design</th></tr></thead><tbody>' +
+      HD_BODIES.map(function (b) {
+        return "<tr><td>" + esc(b) + '</td><td class="result" style="font-size:1rem">' +
+          hd.personality[b].gate + "." + hd.personality[b].line +
+          '</td><td class="result" style="font-size:1rem">' + hd.design[b].gate + "." + hd.design[b].line + "</td></tr>";
+      }).join("") + "</tbody></table></div>";
+
+    html += '<p class="hd-note">' +
+      (timeKnown ? "" : "Birth time unknown — computed at 12:00 noon. The Moon moves ~13° a day, so Moon-dependent details (and sometimes profile or type) can shift with the real time. ") +
+      "Computed with a built-in astronomical model (tropical zodiac, mean lunar node, Design at 88° of solar arc before birth). Positions are accurate to a fraction of a degree; a gate that sits within ~0.5° of a boundary could differ from professional software. Inspired by the Human Design system — interpretations are original.</p>";
+
+    return html;
+  }
+
   /* ============ Interpretation ============ */
 
   function firstName(name) {
@@ -1256,6 +1755,9 @@
     document.getElementById("fn-title").textContent = "Name Reading — " + p.firstName;
     document.getElementById("fn-body").innerHTML = nameReadingHTML(p);
     document.getElementById("harmony-body").innerHTML = harmonyHTML(p);
+    document.getElementById("hd-body").innerHTML = p.hd
+      ? hdHTML(p.hd, p.hdTimeKnown)
+      : '<p class="harmony-note">Add a birth time above (or check “I don’t know my birth time”) and decode again to see the Human Design chart.</p>';
 
     var grid = document.getElementById("num-grid");
     grid.innerHTML = LAYER_DEFS.map(function (d) {
@@ -1330,6 +1832,16 @@
       notes.forEach(function (n) {
         lines.push("Karmic debt " + n.code + " in " + n.layer + ": " + n.text);
       });
+    }
+    if (p.hd) {
+      var t = HD_TYPES[p.hd.type];
+      lines.push("");
+      lines.push("HUMAN DESIGN: " + p.hd.type + " · Profile " + p.hd.profile +
+        " · " + p.hd.authority + " authority · " + p.hd.definition + " definition");
+      lines.push("   Strategy: " + t.strategy + " · Signature: " + t.signature + " · Not-self: " + t.notSelf);
+      lines.push("   Defined centers: " + (p.hd.definedCenters.join(", ") || "none"));
+      lines.push("   Channels: " + (p.hd.channels.map(function (c) { return c[0] + "-" + c[1]; }).join(", ") || "none"));
+      if (!p.hdTimeKnown) lines.push("   (Birth time unknown — chart computed at 12:00 noon)");
     }
     lines.push("");
     lines.push("Symbolic interpretation for reflection & entertainment — not scientific advice.");
@@ -1493,7 +2005,13 @@
         document.getElementById("name").value = item.name;
         setDateFields(item.dob);
         document.getElementById("called").value = item.called || "";
-        render(computeProfile(item.name, item.dob, item.called || ""));
+        var prof = computeProfile(item.name, item.dob, item.called || "");
+        if (item.hd) {
+          prof.hd = computeHumanDesign(item.dob, item.hd.h24, item.hd.min, item.hd.tz);
+          prof.hdTimeKnown = item.hd.known;
+          prof.hdInput = item.hd;
+        }
+        render(prof);
       });
 
       var del = document.createElement("button");
@@ -1557,20 +2075,77 @@
     document.getElementById("dob-d").value = parts[2] || "";
   }
 
+  function readTimeFields() {
+    var unknown = document.getElementById("bt-unknown").checked;
+    if (unknown) return { h24: 12, min: 0, known: false };
+    var hRaw = document.getElementById("bt-h").value.trim();
+    var mRaw = document.getElementById("bt-min").value.trim();
+    if (!hRaw && !mRaw) return { h24: 12, min: 0, known: false }; // left blank = treat as unknown
+    var h = parseInt(hRaw, 10);
+    var m = parseInt(mRaw || "0", 10);
+    if (isNaN(h) || h < 1 || h > 12) return { error: "Birth hour must be 1–12 (or check “I don't know my birth time”)." };
+    if (isNaN(m) || m < 0 || m > 59) return { error: "Birth minutes must be 00–59." };
+    var ap = document.getElementById("bt-ap").value;
+    var h24 = (h % 12) + (ap === "PM" ? 12 : 0);
+    return { h24: h24, min: m, known: true };
+  }
+
   function handleCalculate() {
     var name = document.getElementById("name").value;
     var called = document.getElementById("called").value;
     if (!cleanLetters(name)) { showError("Enter a full name using letters A–Z."); return; }
     var date = readDateFields();
     if (date.error) { showError(date.error); return; }
+    var time = readTimeFields();
+    if (time.error) { showError(time.error); return; }
     showError("");
-    render(computeProfile(name, date.iso, called));
+    var profile = computeProfile(name, date.iso, called);
+    var tz = parseFloat(document.getElementById("bt-tz").value);
+    profile.hd = computeHumanDesign(date.iso, time.h24, time.min, tz);
+    profile.hdTimeKnown = time.known;
+    profile.hdInput = { h24: time.h24, min: time.min, tz: tz, known: time.known };
+    render(profile);
   }
 
   document.getElementById("calc-btn").addEventListener("click", handleCalculate);
   ["name", "dob-m", "dob-d", "dob-y", "called"].forEach(function (id) {
     document.getElementById(id).addEventListener("keydown", function (e) {
       if (e.key === "Enter") handleCalculate();
+    });
+  });
+
+  // Time-zone dropdown: common US zones first, then the full UTC range
+  (function buildTzOptions() {
+    var sel = document.getElementById("bt-tz");
+    var named = [
+      [-5, "Eastern (winter) UTC-5"], [-4, "Eastern DST UTC-4"],
+      [-6, "Central (winter) UTC-6"], [-5.01, null],
+      [-7, "Mountain (winter) UTC-7"], [-8, "Pacific (winter) UTC-8"],
+      [-9, "Alaska (winter) UTC-9"], [-10, "Hawaii UTC-10"], [0, "London (winter) UTC+0"]
+    ];
+    var added = {};
+    named.forEach(function (o) {
+      if (o[1] === null) return;
+      var opt = document.createElement("option");
+      opt.value = String(o[0]);
+      opt.textContent = o[1];
+      sel.appendChild(opt);
+      added[o[0]] = true;
+    });
+    for (var tz = -12; tz <= 14; tz += 0.5) {
+      if (added[tz]) continue;
+      var opt2 = document.createElement("option");
+      opt2.value = String(tz);
+      opt2.textContent = "UTC" + (tz >= 0 ? "+" : "") + tz;
+      sel.appendChild(opt2);
+    }
+    sel.value = "-5";
+  })();
+
+  document.getElementById("bt-unknown").addEventListener("change", function () {
+    var off = this.checked;
+    ["bt-h", "bt-min", "bt-ap"].forEach(function (id) {
+      document.getElementById(id).disabled = off;
     });
   });
 
@@ -1651,7 +2226,7 @@
     var list = loadProfiles();
     var exists = list.some(function (i) { return i.name === current.name && i.dob === current.dobISO; });
     if (!exists) {
-      list.unshift({ name: current.name, dob: current.dobISO, called: current.calledName || "" });
+      list.unshift({ name: current.name, dob: current.dobISO, called: current.calledName || "", hd: current.hdInput || null });
       if (list.length > 20) list.length = 20;
       if (!saveProfiles(list)) { toast("Saving isn’t available in this browser"); return; }
     }
@@ -1684,7 +2259,14 @@
     harmonyLevel: harmonyLevel,
     triadOf: triadOf,
     nameReadingHTML: nameReadingHTML,
-    harmonyHTML: harmonyHTML
+    harmonyHTML: harmonyHTML,
+    computeHumanDesign: computeHumanDesign,
+    sunLongitude: sunLongitude,
+    moonLongitude: moonLongitude,
+    planetLongitude: planetLongitude,
+    julianDay: julianDay,
+    gateLine: gateLine,
+    hdHTML: hdHTML
   };
 
   renderProfiles();
