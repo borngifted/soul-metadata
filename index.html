@@ -113,6 +113,12 @@
     color: var(--muted);
     margin: 16px 0 7px;
   }
+  .date-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.7fr;
+    gap: 10px;
+  }
+  .date-row input { text-align: center; font-variant-numeric: tabular-nums; }
   input[type="text"], input[type="date"] {
     width: 100%;
     background: rgba(0, 0, 0, 0.35);
@@ -532,8 +538,12 @@
     <h2 class="panel-title">Profile Input</h2>
     <label for="name">Full birth name</label>
     <input type="text" id="name" autocomplete="name" placeholder="e.g. TyQawn Curtis Headen" enterkeyhint="go" />
-    <label for="dob">Date of birth</label>
-    <input type="date" id="dob" />
+    <label for="dob-m">Date of birth</label>
+    <div class="date-row">
+      <input type="text" id="dob-m" inputmode="numeric" maxlength="2" placeholder="MM" aria-label="Birth month (2 digits)" enterkeyhint="next" />
+      <input type="text" id="dob-d" inputmode="numeric" maxlength="2" placeholder="DD" aria-label="Birth day (2 digits)" enterkeyhint="next" />
+      <input type="text" id="dob-y" inputmode="numeric" maxlength="4" placeholder="YYYY" aria-label="Birth year (4 digits)" enterkeyhint="go" />
+    </div>
     <label for="called">Name you go by — optional</label>
     <input type="text" id="called" autocomplete="nickname" placeholder="Nickname or the name people actually call you" enterkeyhint="go" />
     <button class="btn btn-primary" id="calc-btn" type="button">Decode the Pattern</button>
@@ -672,14 +682,14 @@
     var digits = (dob.mm + dob.dd + dob.yyyy).split("");
     var total = digits.reduce(function (s, d) { return s + Number(d); }, 0);
     var r = layerResult(total);
-    r.trace = digits.join("+") + " = " + total + traceTail(r, total);
+    r.trace = dob.mm + "/" + dob.dd + "/" + dob.yyyy + " → " + digits.join("+") + " = " + total + traceTail(r, total);
     return r;
   }
 
   function calcBirthDay(dob) {
     var day = Number(dob.dd);
     var r = layerResult(day);
-    r.trace = day <= 9 ? String(day) : day + traceTail(r, day);
+    r.trace = "Day " + day + (day <= 9 ? "" : traceTail(r, day));
     return r;
   }
 
@@ -1475,11 +1485,13 @@
       load.className = "profile-load";
       var lp = "?";
       try { lp = String(computeProfile(item.name, item.dob).lifePath.final); } catch (e) {}
+      var dparts = item.dob.split("-");
+      var dobShown = dparts.length === 3 ? dparts[1] + "/" + dparts[2] + "/" + dparts[0] : item.dob;
       load.innerHTML = '<span class="p-num">' + esc(lp) + "</span>" + esc(item.name) +
-        '<span class="p-dob">' + esc(item.dob) + "</span>";
+        '<span class="p-dob">' + esc(dobShown) + "</span>";
       load.addEventListener("click", function () {
         document.getElementById("name").value = item.name;
-        document.getElementById("dob").value = item.dob;
+        setDateFields(item.dob);
         document.getElementById("called").value = item.called || "";
         render(computeProfile(item.name, item.dob, item.called || ""));
       });
@@ -1518,20 +1530,58 @@
     el.style.display = msg ? "block" : "none";
   }
 
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+
+  // Build a validated ISO date from the three explicit fields, or return
+  // an error string. Month/day/year are never inferred from locale.
+  function readDateFields() {
+    var m = parseInt(document.getElementById("dob-m").value, 10);
+    var d = parseInt(document.getElementById("dob-d").value, 10);
+    var yRaw = document.getElementById("dob-y").value.trim();
+    var y = parseInt(yRaw, 10);
+    if (isNaN(m) || isNaN(d) || isNaN(y)) return { error: "Enter the birth date as month, day, and 4-digit year." };
+    if (yRaw.length !== 4) return { error: "Enter the year as 4 digits (e.g. 1982)." };
+    if (m < 1 || m > 12) return { error: "Month must be between 01 and 12." };
+    if (d < 1 || d > 31) return { error: "Day must be between 01 and 31." };
+    var check = new Date(y, m - 1, d);
+    if (check.getFullYear() !== y || check.getMonth() !== m - 1 || check.getDate() !== d) {
+      return { error: "That day doesn't exist in month " + pad2(m) + " — check the date." };
+    }
+    return { iso: y + "-" + pad2(m) + "-" + pad2(d) };
+  }
+
+  function setDateFields(iso) {
+    var parts = (iso || "").split("-");
+    document.getElementById("dob-y").value = parts[0] || "";
+    document.getElementById("dob-m").value = parts[1] || "";
+    document.getElementById("dob-d").value = parts[2] || "";
+  }
+
   function handleCalculate() {
     var name = document.getElementById("name").value;
-    var dob = document.getElementById("dob").value;
     var called = document.getElementById("called").value;
     if (!cleanLetters(name)) { showError("Enter a full name using letters A–Z."); return; }
-    if (!dob) { showError("Enter a date of birth."); return; }
+    var date = readDateFields();
+    if (date.error) { showError(date.error); return; }
     showError("");
-    render(computeProfile(name, dob, called));
+    render(computeProfile(name, date.iso, called));
   }
 
   document.getElementById("calc-btn").addEventListener("click", handleCalculate);
-  ["name", "dob", "called"].forEach(function (id) {
+  ["name", "dob-m", "dob-d", "dob-y", "called"].forEach(function (id) {
     document.getElementById(id).addEventListener("keydown", function (e) {
       if (e.key === "Enter") handleCalculate();
+    });
+  });
+
+  // Digits only + auto-advance across the three date boxes
+  [["dob-m", "dob-d"], ["dob-d", "dob-y"], ["dob-y", null]].forEach(function (pair) {
+    var el = document.getElementById(pair[0]);
+    el.addEventListener("input", function () {
+      el.value = el.value.replace(/\D/g, "");
+      if (pair[1] && el.value.length >= el.maxLength) {
+        document.getElementById(pair[1]).focus();
+      }
     });
   });
 
