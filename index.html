@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Soul Metadata</title>
+<style>
+  :root {
+    --bg: #0b0b11;
+    --bg-glow: #1c1a2b;
+    --panel: rgba(255, 255, 255, 0.035);
+    --panel-solid: #15141d;
+    --line: rgba(216, 180, 90, 0.18);
+    --line-soft: rgba(255, 255, 255, 0.08);
+    --gold: #d8b45a;
+    --gold-bright: #f0d489;
+    --gold-dim: rgba(216, 180, 90, 0.55);
+    --text: #f2edde;
+    --muted: #a09eae;
+    --serif: "Didot", "Bodoni 72", "Playfair Display", "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Avenir Next", "Segoe UI", Roboto, sans-serif;
+    --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background:
+      radial-gradient(ellipse 120% 60% at 50% -10%, var(--bg-glow), transparent 60%),
+      radial-gradient(ellipse 80% 50% at 80% 110%, #171325, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.65;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    width: min(680px, 92vw);
+    margin: 0 auto;
+    padding: 0 0 90px;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    text-align: center;
+    padding: 64px 8px 40px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  header h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(2.4rem, 8vw, 3.6rem);
+    letter-spacing: 0.01em;
+    margin: 14px 0 12px;
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+  header h1 em {
+    font-style: italic;
+    color: var(--gold-bright);
+  }
+  header p {
+    color: var(--muted);
+    max-width: 46ch;
+    margin: 0 auto;
+    font-size: 1rem;
+  }
+
+  /* ---------- Panels ---------- */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    padding: 26px 22px;
+    margin: 22px 0;
+  }
+  .panel-title {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .panel-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* ---------- Form ---------- */
+  label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 16px 0 7px;
+  }
+  input[type="text"], input[type="date"] {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--line-soft);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 1.05rem;
+    padding: 13px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 48px;
+  }
+  input:focus-visible {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px var(--gold-dim);
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    padding: 14px 20px;
+    cursor: pointer;
+    border: 1px solid var(--gold-dim);
+    background: transparent;
+    color: var(--gold-bright);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    min-height: 48px;
+  }
+  .btn:hover { background: rgba(216, 180, 90, 0.1); }
+  .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .btn-primary {
+    background: linear-gradient(180deg, #e3c26e, #c29a3f);
+    color: #17130a;
+    border: none;
+    font-weight: 700;
+    width: 100%;
+    margin-top: 22px;
+  }
+  .btn-primary:hover { background: linear-gradient(180deg, #f0d489, #d0a94e); }
+  .error {
+    color: #e8a1a1;
+    font-size: 0.88rem;
+    margin-top: 10px;
+    display: none;
+  }
+
+  /* ---------- Results hero ---------- */
+  #results { display: none; }
+  .hero-num {
+    text-align: center;
+    padding: 44px 10px 30px;
+  }
+  .hero-num .big {
+    font-family: var(--serif);
+    font-size: clamp(6rem, 26vw, 9.5rem);
+    line-height: 0.9;
+    color: var(--gold-bright);
+    text-shadow: 0 0 70px rgba(216, 180, 90, 0.35);
+    display: block;
+  }
+  .hero-num .big-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 14px;
+  }
+  .hero-num .big-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.5rem;
+    color: var(--text);
+    display: block;
+    margin-top: 12px;
+  }
+  .hero-num .subject {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-top: 8px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal { animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: none; }
+    }
+  }
+
+  /* ---------- Number grid ---------- */
+  .num-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  .num-card {
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    padding: 16px 14px 14px;
+    background: rgba(0, 0, 0, 0.25);
+  }
+  .num-card .nc-layer {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .num-card .nc-value {
+    font-family: var(--serif);
+    font-size: 2.3rem;
+    color: var(--gold-bright);
+    line-height: 1.1;
+    margin: 6px 0 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .num-card .nc-title {
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+  .master-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #17130a;
+    background: var(--gold);
+    border-radius: 2px;
+    padding: 2px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* ---------- Table ---------- */
+  .table-scroll { overflow-x: auto; margin: 0 -22px; padding: 0 22px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    min-width: 520px;
+  }
+  th, td {
+    text-align: left;
+    vertical-align: top;
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  th {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  td.calc { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+  td.result {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    color: var(--gold-bright);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  tr:last-child td { border-bottom: none; }
+
+  /* ---------- Deep meaning ---------- */
+  .deep p { margin: 0 0 18px; max-width: 62ch; }
+  .deep p:last-child { margin-bottom: 0; }
+  .deep strong { color: var(--gold-bright); font-weight: 600; }
+  blockquote {
+    margin: 0;
+    padding: 20px 22px;
+    border-left: 2px solid var(--gold);
+    background: rgba(216, 180, 90, 0.05);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.12rem;
+    line-height: 1.7;
+  }
+  .karmic {
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: rgba(216, 180, 90, 0.04);
+    padding: 16px 18px;
+    margin-top: 16px;
+    font-size: 0.92rem;
+  }
+  .karmic-title {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .karmic p { margin: 6px 0 0; color: var(--muted); }
+  .karmic p strong { color: var(--text); }
+
+  /* ---------- Actions ---------- */
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+  }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--gold);
+    color: #17130a;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    padding: 12px 22px;
+    border-radius: 3px;
+    transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+    z-index: 50;
+    max-width: 88vw;
+    text-align: center;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Saved profiles ---------- */
+  .profiles { display: flex; flex-direction: column; gap: 8px; }
+  .profile-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--line-soft);
+    border-radius: 3px;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.25);
+  }
+  .profile-load {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    text-align: left;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+  .profile-load .p-num {
+    font-family: var(--serif);
+    color: var(--gold-bright);
+    margin-right: 10px;
+    font-size: 1.1rem;
+  }
+  .profile-load .p-dob {
+    font-family: var(--mono);
+    color: var(--muted);
+    font-size: 0.75rem;
+    margin-left: 8px;
+  }
+  .profile-del {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+  }
+  .profile-del:hover { color: #e8a1a1; }
+  .profile-load:focus-visible, .profile-del:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+  .empty-note { color: var(--muted); font-size: 0.9rem; margin: 0; }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.78rem;
+    padding: 30px 16px 0;
+    max-width: 52ch;
+    margin: 0 auto;
+  }
+  footer .eyebrow { display: block; margin-bottom: 10px; }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Soul Metadata</span>
+    <h1>Read the code<br />behind <em>the name.</em></h1>
+    <p>Enter a full birth name and date of birth to generate a symbolic numerology profile — six layers of Pythagorean metadata, decoded.</p>
+  </header>
+
+  <section class="panel" id="input-panel">
+    <h2 class="panel-title">Profile Input</h2>
+    <label for="name">Full birth name</label>
+    <input type="text" id="name" autocomplete="name" placeholder="e.g. TyQawn Curtis Headen" enterkeyhint="go" />
+    <label for="dob">Date of birth</label>
+    <input type="date" id="dob" />
+    <button class="btn btn-primary" id="calc-btn" type="button">Decode the Pattern</button>
+    <p class="error" id="form-error"></p>
+  </section>
+
+  <div id="results">
+    <div class="hero-num reveal" id="hero"></div>
+
+    <section class="panel">
+      <h2 class="panel-title">Core Numbers</h2>
+      <div class="num-grid" id="num-grid"></div>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel-title">Metadata Results</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Layer</th><th>Calculation</th><th>Result</th><th>Core Meaning</th></tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel deep">
+      <h2 class="panel-title">Deep Meaning</h2>
+      <div id="deep-text"></div>
+      <div id="karmic-box"></div>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel-title">Pattern Statement</h2>
+      <blockquote id="pattern-text"></blockquote>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel-title">Share &amp; Save</h2>
+      <div class="actions">
+        <button class="btn" type="button" id="share-card-btn">Text the Card</button>
+        <button class="btn" type="button" id="download-card-btn">Download Card</button>
+        <button class="btn" type="button" id="copy-btn">Copy Report</button>
+        <button class="btn" type="button" id="save-btn">Save Profile</button>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel" id="saved-panel" style="display:none">
+    <h2 class="panel-title">Saved Profiles</h2>
+    <div class="profiles" id="profiles-list"></div>
+  </section>
+
+  <footer>
+    <span class="eyebrow">Soul Metadata</span>
+    This is a symbolic, numerological interpretation for reflection and entertainment — not scientific, legal, medical, financial, or psychological advice.
+    <p style="margin-top:18px">
+      <button class="btn" type="button" id="share-app-btn">Share this app</button>
+    </p>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ============ Calculation engine (Pythagorean) ============ */
+
+  var MASTERS = [11, 22, 33];
+
+  var LETTER_MAP = {
+    A: 1, J: 1, S: 1, B: 2, K: 2, T: 2, C: 3, L: 3, U: 3,
+    D: 4, M: 4, V: 4, E: 5, N: 5, W: 5, F: 6, O: 6, X: 6,
+    G: 7, P: 7, Y: 7, H: 8, Q: 8, Z: 8, I: 9, R: 9
+  };
+
+  function letterValue(ch) { return LETTER_MAP[ch.toUpperCase()] || 0; }
+
+  function digitSum(n) {
+    return String(n).split("").reduce(function (s, d) { return s + Number(d); }, 0);
+  }
+
+  // Reduce, recording every step. Preserves master numbers 11 / 22 / 33.
+  function reduceSteps(n, preserveMaster) {
+    if (preserveMaster === undefined) preserveMaster = true;
+    var steps = [n];
+    var cur = n;
+    while (cur > 9) {
+      if (preserveMaster && MASTERS.indexOf(cur) !== -1) break;
+      cur = digitSum(cur);
+      steps.push(cur);
+    }
+    return steps;
+  }
+
+  // Build a layer result: raw total, reduction steps, final, compound, display.
+  function layerResult(rawTotal) {
+    var steps = reduceSteps(rawTotal, true);
+    var final = steps[steps.length - 1];
+    var isMaster = MASTERS.indexOf(final) !== -1;
+    var compound = null;
+    var display;
+    if (isMaster) {
+      compound = final;
+      display = final + "/" + digitSum(final);
+    } else if (steps.length >= 2 && steps[steps.length - 2] > 9) {
+      compound = steps[steps.length - 2];
+      display = compound + "/" + final;
+    } else {
+      display = String(final);
+    }
+    return {
+      raw: rawTotal, steps: steps, final: final,
+      compound: compound, isMaster: isMaster, display: display
+    };
+  }
+
+  function cleanLetters(name) { return name.replace(/[^A-Za-z]/g, ""); }
+  function isVowel(ch) { return "AEIOU".indexOf(ch.toUpperCase()) !== -1; }
+
+  // dob parts: {mm, dd, yyyy} as strings
+  function calcLifePath(dob) {
+    var digits = (dob.mm + dob.dd + dob.yyyy).split("");
+    var total = digits.reduce(function (s, d) { return s + Number(d); }, 0);
+    var r = layerResult(total);
+    r.trace = digits.join("+") + " = " + total + traceTail(r, total);
+    return r;
+  }
+
+  function calcBirthDay(dob) {
+    var day = Number(dob.dd);
+    var r = layerResult(day);
+    r.trace = day <= 9 ? String(day) : day + traceTail(r, day);
+    return r;
+  }
+
+  function calcExpression(name) {
+    var words = name.trim().split(/\s+/).filter(Boolean);
+    var parts = [];
+    var total = 0;
+    words.forEach(function (w) {
+      var sum = cleanLetters(w).split("").reduce(function (s, c) { return s + letterValue(c); }, 0);
+      if (sum > 0) { parts.push(w + " " + sum); total += sum; }
+    });
+    var r = layerResult(total);
+    r.trace = parts.join(" + ") + " = " + total + traceTail(r, total);
+    return r;
+  }
+
+  function nameFilterSum(name, keepVowels) {
+    return cleanLetters(name).split("").filter(function (c) {
+      return keepVowels ? isVowel(c) : !isVowel(c);
+    }).reduce(function (s, c) { return s + letterValue(c); }, 0);
+  }
+
+  function calcSoulUrge(name) {
+    var total = nameFilterSum(name, true);
+    var r = layerResult(total);
+    r.trace = "Vowels = " + total + traceTail(r, total);
+    return r;
+  }
+
+  function calcPersonality(name) {
+    var total = nameFilterSum(name, false);
+    var r = layerResult(total);
+    r.trace = "Consonants = " + total + traceTail(r, total);
+    return r;
+  }
+
+  function calcMaturity(lifePath, expression) {
+    var total = lifePath.final + expression.final;
+    var r = layerResult(total);
+    r.trace = lifePath.final + " + " + expression.final + " = " + total + traceTail(r, total);
+    return r;
+  }
+
+  // " → 14 → 5" style tail for traces, skipping the raw total itself
+  function traceTail(r, total) {
+    var tail = "";
+    r.steps.forEach(function (s, i) {
+      if (i === 0) return;
+      tail += " → " + s;
+    });
+    return tail;
+  }
+
+  /* ============ Meaning library ============ */
+
+  var CORE = {
+    1:  { title: "The Pioneer",        keywords: "Independence, drive, originality, courage",
+          essence: "raw initiative — the instinct to go first, decide fast, and carve a path where none existed" },
+    2:  { title: "The Diplomat",       keywords: "Intuition, partnership, timing, sensitivity",
+          essence: "quiet power — reading the room, feeling what is unsaid, and moving people through connection rather than force" },
+    3:  { title: "The Communicator",   keywords: "Expression, creativity, joy, magnetism",
+          essence: "creative voltage — turning feeling into words, art, humor, and presence that people remember" },
+    4:  { title: "The Builder",        keywords: "Structure, discipline, loyalty, endurance",
+          essence: "foundation energy — the patience to build things brick by brick that still stand years later" },
+    5:  { title: "The Catalyst",       keywords: "Freedom, movement, reinvention, media",
+          essence: "movement and evolution — travel, communication, disruption, and the refusal to stay in one lane forever" },
+    6:  { title: "The Guardian",       keywords: "Service, family, responsibility, beauty",
+          essence: "protective love — the drive to provide, restore, beautify, and build legacy for the people you claim" },
+    7:  { title: "The Seeker",         keywords: "Wisdom, analysis, spirit, solitude",
+          essence: "the decode-the-pattern mind — research, spiritual insight, and truth found beneath the surface of things" },
+    8:  { title: "The Executive",      keywords: "Power, ambition, value, authority",
+          essence: "material mastery — the instinct for business, leverage, and turning vision into measurable results" },
+    9:  { title: "The Humanitarian",   keywords: "Compassion, artistry, completion, vision",
+          essence: "old-soul breadth — art, empathy, and service that thinks in generations, not moments" },
+    11: { title: "The Visionary",      keywords: "Illumination, inspiration, heightened intuition",
+          essence: "a messenger signal — receiving more than can be explained in the moment, and translating it so others can feel it" },
+    22: { title: "The Master Builder", keywords: "Large-scale vision made concrete",
+          essence: "architect energy — the rare pairing of big dreams with the practical power to construct them in the real world" },
+    33: { title: "The Master Teacher", keywords: "Healing through love, selfless uplift",
+          essence: "devotional force — teaching, healing, and raising others as the central work of a lifetime" }
+  };
+
+  var LAYER_MEANINGS = {
+    lifePath: {
+      1:  "A path of independence — learning to lead, initiate, and stand on your own decisions.",
+      2:  "A path of connection — learning partnership, patience, timing, and the power of quiet influence.",
+      3:  "A path of expression — learning to turn feeling into words, art, and joy that reaches people.",
+      4:  "A path of building — learning discipline, systems, and the long game of solid foundations.",
+      5:  "Freedom, movement, reinvention, media, communication, adaptability, change-maker energy.",
+      6:  "A path of care — learning responsibility, family, service, and leadership through healing.",
+      7:  "A path of depth — learning analysis, spiritual study, solitude, and trust in inner knowing.",
+      8:  "A path of power — learning ambition, money mastery, authority, and ethical leadership.",
+      9:  "A path of completion — learning compassion, artistry, release, and the bigger picture.",
+      11: "A master path of illumination — heightened intuition meant to inspire and uplift at scale.",
+      22: "A master path of building — turning big vision into real-world structures that outlast you.",
+      33: "A master path of teaching — healing and uplifting others through selfless creative love."
+    },
+    birthDay: {
+      1:  "A gift of initiative — self-starting energy and the courage to go first.",
+      2:  "Intuition, diplomacy, emotional intelligence, partnership, reading the room, spiritual sensitivity.",
+      3:  "A gift of charm — natural wordplay, humor, and creative spark.",
+      4:  "A gift of steadiness — practical hands and follow-through people rely on.",
+      5:  "A gift of adaptability — quick reflexes, curiosity, and a love of motion.",
+      6:  "A gift of care — a natural protector who makes people feel held.",
+      7:  "A gift of perception — a mind that reads beneath the surface.",
+      8:  "A gift of command — instinct for business, value, and results.",
+      9:  "A gift of empathy — old-soul warmth that draws people in.",
+      11: "A gift of insight — antenna-like sensitivity and flashes of vision.",
+      22: "A gift of scale — seeing how big ideas become concrete plans.",
+      33: "A gift of devotion — nurturing energy that heals through presence."
+    },
+    expression: {
+      1:  "Talents present as leadership — originality, decisiveness, and pioneering work.",
+      2:  "Talents present as diplomacy — mediation, support, and perfect timing.",
+      3:  "Talents present as voice — performance, writing, design, and social magnetism.",
+      4:  "Talents present as craft — organization, systems, and dependable execution.",
+      5:  "Talents present as versatility — media, promotion, travel, and rapid reinvention.",
+      6:  "Talents present as stewardship — teaching, healing, hosting, and building community.",
+      7:  "Talents present as analysis — research, strategy, and specialist depth.",
+      8:  "Talents present as enterprise — management, negotiation, and material results.",
+      9:  "Talents present as artistry — broad creative vision in service of many.",
+      11: "Master messenger, visionary signal, public inspiration, heightened perception, spiritual creativity.",
+      22: "Master builder expression — talents built for institutions, platforms, and lasting structures.",
+      33: "Master teacher expression — talents built for healing, mentorship, and uplift at scale."
+    },
+    soulUrge: {
+      1:  "The heart wants autonomy — to win on its own terms and be first.",
+      2:  "The heart wants harmony — deep bonds, peace, and true partnership.",
+      3:  "The heart wants expression — to create, perform, and be truly heard.",
+      4:  "The heart wants security — order, loyalty, and something solid to stand on.",
+      5:  "The heart wants freedom — experience, variety, and open horizons.",
+      6:  "Protector, family-centered builder, service, responsibility, beauty, healing through creative leadership.",
+      7:  "The heart wants truth — quiet, depth, and understanding of the unseen.",
+      8:  "The heart wants achievement — influence, abundance, and earned respect.",
+      9:  "The heart wants meaning — to give, to heal, and to leave the world better.",
+      11: "The heart wants illumination — to inspire and be part of something transcendent.",
+      22: "The heart wants legacy — to build something vast that serves generations.",
+      33: "The heart wants to nurture — to heal and uplift as a life's devotion."
+    },
+    personality: {
+      1:  "Reads as confident and direct — a natural front-runner.",
+      2:  "Reads as gentle and approachable — people confide easily.",
+      3:  "Reads as bright and entertaining — the room notices arrival.",
+      4:  "Reads as solid and trustworthy — the dependable one.",
+      5:  "Magnetic, quick-moving, unconventional, persuasive — challenged to discipline freedom into structure.",
+      6:  "Reads as warm and responsible — the one people turn to.",
+      7:  "Reads as private and perceptive — an air of mystery.",
+      8:  "Reads as capable and commanding — built for authority.",
+      9:  "Reads as gracious and worldly — quietly charismatic.",
+      11: "Reads as luminous and unusual — people sense something more.",
+      22: "Reads as grounded yet visionary — quietly formidable.",
+      33: "Reads as nurturing and magnetic — a safe harbor for others."
+    },
+    maturity: {
+      1:  "Later life crystallizes around independence — owning your lane completely.",
+      2:  "Later life crystallizes around partnership — counsel, mediation, and quiet influence.",
+      3:  "Later life crystallizes around expression — the creative voice fully ripened.",
+      4:  "Later life crystallizes around legacy structures — what you built that lasts.",
+      5:  "Later life crystallizes around freedom earned — movement with mastery.",
+      6:  "Later life crystallizes around family and service — the elder who holds it together.",
+      7:  "Deep wisdom, spiritual refinement, truth-seeking, research, inner mastery after major resets.",
+      8:  "Later life crystallizes around stewardship — wealth and power used well.",
+      9:  "Later life crystallizes around giving back — art and compassion at full scale.",
+      11: "Later life crystallizes around inspiration — the message finally lands at scale.",
+      22: "Later life crystallizes around the master work — the big build completed.",
+      33: "Later life crystallizes around teaching — healing others as the final work."
+    }
+  };
+
+  var LESSONS = {
+    1: "turn independence into leadership that lifts others",
+    2: "turn sensitivity into strategy and quiet influence into real power",
+    3: "turn raw talent into finished work that reaches people",
+    4: "turn effort into systems and systems into legacy",
+    5: "turn freedom into structure, intuition into strategy, and personal experience into a system that helps others evolve",
+    6: "turn care into boundaries and service into sustainable leadership",
+    7: "turn solitude into wisdom and wisdom into something you share",
+    8: "turn ambition into stewardship and power into protection",
+    9: "turn endings into art and compassion into a wider mission",
+    11: "ground the vision into systems people can actually use",
+    22: "trust the size of the vision and build it brick by brick",
+    33: "serve fully without losing yourself in what others need"
+  };
+
+  var KARMIC = {
+    13: { code: "13/4", text: "Shortcuts cost double here. The lesson is honest, consistent work — effort compounds into unshakeable foundations." },
+    14: { code: "14/5", text: "Freedom must be disciplined. Moderation, focus, and follow-through are what turn charisma into staying power." },
+    16: { code: "16/7", text: "Ego resets and sudden rebuilds refine you. Each reset trades a false identity for real wisdom." },
+    19: { code: "19/1", text: "Self-reliance is the test. Lead without dominating; receive help without losing yourself." }
+  };
+
+  /* ============ Interpretation ============ */
+
+  function firstName(name) {
+    var w = name.trim().split(/\s+/);
+    return w[0] || name;
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function deepParagraphs(p) {
+    var lp = p.lifePath, ex = p.expression, su = p.soulUrge, pe = p.personality, ma = p.maturity, bd = p.birthDay;
+    var paras = [];
+
+    paras.push(
+      "The <strong>" + lp.display + " Life Path</strong> is the storyline this profile walks: " +
+      CORE[lp.final].essence + ". It sets the overall assignment — " +
+      LAYER_MEANINGS.lifePath[lp.final].charAt(0).toLowerCase() + LAYER_MEANINGS.lifePath[lp.final].slice(1)
+    );
+
+    paras.push(
+      "Layered on top is the <strong>" + ex.display + " Expression</strong>, drawn from every letter of the name. " +
+      "This is how the talents actually show up in the world: " + CORE[ex.final].essence + ". " +
+      (ex.isMaster
+        ? "As a master number it carries extra voltage — it receives more than it can always explain in the moment. The gift is vision; the challenge is grounding it into systems."
+        : "When this energy is given structure and repetition, it becomes the signature people know the name by.")
+    );
+
+    paras.push(
+      "Underneath it all, the <strong>" + su.display + " Soul Urge</strong> — calculated from the vowels — reveals what the heart is actually working for: " +
+      CORE[su.final].essence + ". This is the private engine behind the public moves."
+    );
+
+    paras.push(
+      "The <strong>" + pe.display + " Personality</strong>, drawn from the consonants, is the first impression — the outer garment. " +
+      LAYER_MEANINGS.personality[pe.final] + " The <strong>" + bd.display + " Birth Day</strong> adds a specific gift carried since day one: " +
+      LAYER_MEANINGS.birthDay[bd.final].charAt(0).toLowerCase() + LAYER_MEANINGS.birthDay[bd.final].slice(1)
+    );
+
+    paras.push(
+      "The <strong>" + ma.display + " Maturity Number</strong> — Life Path plus Expression — points to where the whole pattern is heading: " +
+      CORE[ma.final].essence + ". " + LAYER_MEANINGS.maturity[ma.final]
+    );
+
+    return paras;
+  }
+
+  function patternStatement(p) {
+    var exT = CORE[p.expression.final].title.toLowerCase().replace(/^the /, "");
+    var lpK = CORE[p.lifePath.final].keywords.toLowerCase();
+    var suK = CORE[p.soulUrge.final].keywords.toLowerCase();
+    var peK = CORE[p.personality.final].keywords.toLowerCase();
+    return "A " + exT + " moving through a life of " + lpK + ". " +
+      "The inner drive is " + suK + ". The outer style is " + peK + ". " +
+      "The life lesson is to " + LESSONS[p.lifePath.final] + ".";
+  }
+
+  function karmicNotes(p) {
+    var layers = [
+      ["Life Path", p.lifePath], ["Birth Day", p.birthDay], ["Expression", p.expression],
+      ["Soul Urge", p.soulUrge], ["Personality", p.personality], ["Maturity", p.maturity]
+    ];
+    var notes = [];
+    var seen = {};
+    layers.forEach(function (pair) {
+      var r = pair[1];
+      var hits = [];
+      if (KARMIC[r.raw]) hits.push(r.raw);
+      if (r.compound && r.compound !== r.raw && KARMIC[r.compound]) hits.push(r.compound);
+      hits.forEach(function (h) {
+        var key = pair[0] + h;
+        if (seen[key]) return;
+        seen[key] = true;
+        notes.push({ layer: pair[0], code: KARMIC[h].code, text: KARMIC[h].text });
+      });
+    });
+    return notes;
+  }
+
+  /* ============ Profile computation ============ */
+
+  function computeProfile(name, dobISO) {
+    // dobISO: YYYY-MM-DD
+    var parts = dobISO.split("-");
+    var dob = { yyyy: parts[0], mm: parts[1], dd: parts[2] };
+    var lifePath = calcLifePath(dob);
+    var expression = calcExpression(name);
+    return {
+      name: name.trim(),
+      dobISO: dobISO,
+      dobPretty: dob.mm + "/" + dob.dd + "/" + dob.yyyy,
+      lifePath: lifePath,
+      birthDay: calcBirthDay(dob),
+      expression: expression,
+      soulUrge: calcSoulUrge(name),
+      personality: calcPersonality(name),
+      maturity: calcMaturity(lifePath, expression)
+    };
+  }
+
+  /* ============ Rendering ============ */
+
+  var current = null;
+
+  var LAYER_DEFS = [
+    ["lifePath", "Life Path"], ["birthDay", "Birth Day"], ["expression", "Expression"],
+    ["soulUrge", "Soul Urge"], ["personality", "Personality"], ["maturity", "Maturity"]
+  ];
+
+  function render(p) {
+    current = p;
+
+    var hero = document.getElementById("hero");
+    hero.innerHTML =
+      '<span class="big-label">Life Path</span>' +
+      '<span class="big">' + esc(String(p.lifePath.final)) + "</span>" +
+      '<span class="big-title">' + esc(CORE[p.lifePath.final].title) + "</span>" +
+      '<p class="subject">' + esc(p.name) + " · " + esc(p.dobPretty) + "</p>";
+
+    var grid = document.getElementById("num-grid");
+    grid.innerHTML = LAYER_DEFS.map(function (d) {
+      var r = p[d[0]];
+      return '<div class="num-card">' +
+        '<div class="nc-layer">' + d[1] + "</div>" +
+        '<div class="nc-value">' + esc(r.display) +
+        (r.isMaster ? '<span class="master-tag">Master</span>' : "") + "</div>" +
+        '<div class="nc-title">' + esc(CORE[r.final].title) + "</div>" +
+        "</div>";
+    }).join("");
+
+    var tbody = document.getElementById("table-body");
+    tbody.innerHTML = LAYER_DEFS.map(function (d) {
+      var r = p[d[0]];
+      return "<tr><td>" + d[1] + "</td>" +
+        '<td class="calc">' + esc(r.trace) + "</td>" +
+        '<td class="result">' + esc(r.display) + "</td>" +
+        "<td>" + esc(LAYER_MEANINGS[d[0]][r.final]) + "</td></tr>";
+    }).join("");
+
+    document.getElementById("deep-text").innerHTML =
+      deepParagraphs(p).map(function (t) { return "<p>" + t + "</p>"; }).join("");
+
+    var notes = karmicNotes(p);
+    document.getElementById("karmic-box").innerHTML = notes.length
+      ? '<div class="karmic"><div class="karmic-title">Karmic Debt Signals</div>' +
+        notes.map(function (n) {
+          return "<p><strong>" + esc(n.code) + " in " + esc(n.layer) + ":</strong> " + esc(n.text) + "</p>";
+        }).join("") + "</div>"
+      : "";
+
+    document.getElementById("pattern-text").textContent = patternStatement(p);
+
+    var results = document.getElementById("results");
+    results.style.display = "block";
+    hero.classList.remove("reveal");
+    void hero.offsetWidth; // restart animation
+    hero.classList.add("reveal");
+    results.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  /* ============ Report text ============ */
+
+  function reportText(p) {
+    var lines = [];
+    lines.push("SOUL METADATA — NUMEROLOGY PROFILE");
+    lines.push(p.name + " · " + p.dobPretty + " · Pythagorean system");
+    lines.push("");
+    LAYER_DEFS.forEach(function (d) {
+      var r = p[d[0]];
+      lines.push(d[1] + ": " + r.display + " — " + CORE[r.final].title);
+      lines.push("   " + r.trace);
+      lines.push("   " + LAYER_MEANINGS[d[0]][r.final]);
+    });
+    lines.push("");
+    lines.push("PATTERN: " + patternStatement(p));
+    var notes = karmicNotes(p);
+    if (notes.length) {
+      lines.push("");
+      notes.forEach(function (n) {
+        lines.push("Karmic debt " + n.code + " in " + n.layer + ": " + n.text);
+      });
+    }
+    lines.push("");
+    lines.push("Symbolic interpretation for reflection & entertainment — not scientific advice.");
+    return lines.join("\n");
+  }
+
+  /* ============ Share card (canvas) ============ */
+
+  function drawCard(p) {
+    var W = 1080, H = 1350;
+    var cv = document.createElement("canvas");
+    cv.width = W; cv.height = H;
+    var ctx = cv.getContext("2d");
+
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, "#1c1a2b");
+    g.addColorStop(0.4, "#0b0b11");
+    g.addColorStop(1, "#0e0c16");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = "rgba(216,180,90,0.5)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(40, 40, W - 80, H - 80);
+    ctx.strokeStyle = "rgba(216,180,90,0.18)";
+    ctx.strokeRect(52, 52, W - 104, H - 104);
+
+    var serif = '"Didot","Bodoni 72",Georgia,serif';
+    var mono = '"SF Mono",Menlo,monospace';
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#d8b45a";
+    ctx.font = "600 30px " + mono;
+    ctx.fillText("S O U L   M E T A D A T A", W / 2, 140);
+
+    ctx.fillStyle = "#f2edde";
+    var nm = p.name.toUpperCase();
+    var nmSize = nm.length > 22 ? 44 : 56;
+    ctx.font = "400 " + nmSize + "px " + serif;
+    ctx.fillText(nm, W / 2, 225);
+
+    ctx.fillStyle = "#a09eae";
+    ctx.font = "26px " + mono;
+    ctx.fillText(p.dobPretty, W / 2, 272);
+
+    // Glow behind big number
+    var glow = ctx.createRadialGradient(W / 2, 520, 30, W / 2, 520, 320);
+    glow.addColorStop(0, "rgba(216,180,90,0.28)");
+    glow.addColorStop(1, "rgba(216,180,90,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 220, W, 640);
+
+    ctx.fillStyle = "#a09eae";
+    ctx.font = "24px " + mono;
+    ctx.fillText("L I F E   P A T H", W / 2, 390);
+
+    ctx.fillStyle = "#f0d489";
+    ctx.font = "400 300px " + serif;
+    ctx.fillText(String(p.lifePath.final), W / 2, 645);
+
+    ctx.fillStyle = "#f2edde";
+    ctx.font = "italic 52px " + serif;
+    ctx.fillText(CORE[p.lifePath.final].title, W / 2, 730);
+
+    // Six-number strip
+    var cols = 3, cw = (W - 160) / cols;
+    LAYER_DEFS.forEach(function (d, i) {
+      var r = p[d[0]];
+      var cx = 80 + cw * (i % cols) + cw / 2;
+      var cy = 850 + Math.floor(i / cols) * 170;
+      ctx.fillStyle = "#a09eae";
+      ctx.font = "20px " + mono;
+      ctx.fillText(d[1].toUpperCase(), cx, cy);
+      ctx.fillStyle = "#f0d489";
+      ctx.font = "400 64px " + serif;
+      ctx.fillText(r.display, cx, cy + 70);
+    });
+
+    // Pattern line (wrapped)
+    ctx.fillStyle = "#c9c4b2";
+    ctx.font = "italic 30px " + serif;
+    var lesson = "The lesson: " + LESSONS[p.lifePath.final] + ".";
+    wrapText(ctx, lesson, W / 2, 1205, W - 220, 40);
+
+    ctx.fillStyle = "rgba(160,158,174,0.7)";
+    ctx.font = "18px " + mono;
+    ctx.fillText("Symbolic numerology — for reflection & fun", W / 2, 1290);
+
+    return cv;
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    var words = text.split(" ");
+    var line = "";
+    words.forEach(function (w) {
+      var test = line ? line + " " + w : w;
+      if (ctx.measureText(test).width > maxWidth && line) {
+        ctx.fillText(line, x, y);
+        line = w;
+        y += lineHeight;
+      } else {
+        line = test;
+      }
+    });
+    if (line) ctx.fillText(line, x, y);
+  }
+
+  function cardBlob(p) {
+    return new Promise(function (resolve) {
+      drawCard(p).toBlob(resolve, "image/png");
+    });
+  }
+
+  function cardFileName(p) {
+    return "soul-metadata-" + p.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".png";
+  }
+
+  /* ============ Storage ============ */
+
+  var STORE_KEY = "soulMetadataProfiles";
+
+  function loadProfiles() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+
+  function saveProfiles(list) {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(list));
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function renderProfiles() {
+    var list = loadProfiles();
+    var panel = document.getElementById("saved-panel");
+    var box = document.getElementById("profiles-list");
+    if (!list.length) {
+      panel.style.display = "none";
+      box.innerHTML = "";
+      return;
+    }
+    panel.style.display = "block";
+    box.innerHTML = "";
+    list.forEach(function (item, idx) {
+      var row = document.createElement("div");
+      row.className = "profile-row";
+
+      var load = document.createElement("button");
+      load.type = "button";
+      load.className = "profile-load";
+      var lp = "?";
+      try { lp = String(computeProfile(item.name, item.dob).lifePath.final); } catch (e) {}
+      load.innerHTML = '<span class="p-num">' + esc(lp) + "</span>" + esc(item.name) +
+        '<span class="p-dob">' + esc(item.dob) + "</span>";
+      load.addEventListener("click", function () {
+        document.getElementById("name").value = item.name;
+        document.getElementById("dob").value = item.dob;
+        render(computeProfile(item.name, item.dob));
+      });
+
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "profile-del";
+      del.setAttribute("aria-label", "Delete profile for " + item.name);
+      del.textContent = "×";
+      del.addEventListener("click", function () {
+        var l = loadProfiles();
+        l.splice(idx, 1);
+        saveProfiles(l);
+        renderProfiles();
+      });
+
+      row.appendChild(load);
+      row.appendChild(del);
+      box.appendChild(row);
+    });
+  }
+
+  /* ============ UI wiring ============ */
+
+  function toast(msg) {
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.classList.remove("show"); }, 2600);
+  }
+
+  function showError(msg) {
+    var el = document.getElementById("form-error");
+    el.textContent = msg;
+    el.style.display = msg ? "block" : "none";
+  }
+
+  function handleCalculate() {
+    var name = document.getElementById("name").value;
+    var dob = document.getElementById("dob").value;
+    if (!cleanLetters(name)) { showError("Enter a full name using letters A–Z."); return; }
+    if (!dob) { showError("Enter a date of birth."); return; }
+    showError("");
+    render(computeProfile(name, dob));
+  }
+
+  document.getElementById("calc-btn").addEventListener("click", handleCalculate);
+  ["name", "dob"].forEach(function (id) {
+    document.getElementById(id).addEventListener("keydown", function (e) {
+      if (e.key === "Enter") handleCalculate();
+    });
+  });
+
+  document.getElementById("copy-btn").addEventListener("click", function () {
+    if (!current) return;
+    var text = reportText(current);
+    function done() { toast("Report copied — paste it anywhere"); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text); done(); });
+    } else {
+      fallbackCopy(text);
+      done();
+    }
+  });
+
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  document.getElementById("download-card-btn").addEventListener("click", function () {
+    if (!current) return;
+    cardBlob(current).then(function (blob) {
+      if (!blob) { toast("Could not create the card image"); return; }
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = cardFileName(current);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      toast("Card saved — check your downloads");
+    });
+  });
+
+  document.getElementById("share-card-btn").addEventListener("click", function () {
+    if (!current) return;
+    var p = current;
+    cardBlob(p).then(function (blob) {
+      var file = blob ? new File([blob], cardFileName(p), { type: "image/png" }) : null;
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: "Soul Metadata — " + p.name,
+          text: p.name + " · Life Path " + p.lifePath.final + " · " + CORE[p.lifePath.final].title
+        }).catch(function () {});
+      } else if (navigator.share) {
+        navigator.share({
+          title: "Soul Metadata — " + p.name,
+          text: reportText(p)
+        }).catch(function () {});
+      } else {
+        toast("Sharing isn’t supported here — use Download Card instead");
+      }
+    });
+  });
+
+  document.getElementById("save-btn").addEventListener("click", function () {
+    if (!current) return;
+    var list = loadProfiles();
+    var exists = list.some(function (i) { return i.name === current.name && i.dob === current.dobISO; });
+    if (!exists) {
+      list.unshift({ name: current.name, dob: current.dobISO });
+      if (list.length > 20) list.length = 20;
+      if (!saveProfiles(list)) { toast("Saving isn’t available in this browser"); return; }
+    }
+    renderProfiles();
+    toast(exists ? "Already saved" : "Profile saved on this device");
+  });
+
+  document.getElementById("share-app-btn").addEventListener("click", function () {
+    var url = location.href;
+    if (navigator.share) {
+      navigator.share({
+        title: "Soul Metadata",
+        text: "Decode the numerology metadata behind your name ✨",
+        url: url
+      }).catch(function () {});
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () { toast("App link copied — text it to anyone"); });
+    } else {
+      fallbackCopy(url);
+      toast("App link copied — text it to anyone");
+    }
+  });
+
+  window.SoulMetadata = {
+    computeProfile: computeProfile,
+    reportText: reportText,
+    patternStatement: patternStatement,
+    karmicNotes: karmicNotes
+  };
+
+  renderProfiles();
+})();
+</script>
+
+</body>
+</html>
