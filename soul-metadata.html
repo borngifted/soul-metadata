@@ -611,6 +611,89 @@
   }
   .empty-note { color: var(--muted); font-size: 0.9rem; margin: 0; }
 
+  /* ---------- Career ---------- */
+  .field-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 18px; }
+
+  /* ---------- Compatibility ---------- */
+  .compat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 22px;
+  }
+  @media (max-width: 560px) { .compat-grid { grid-template-columns: 1fr; } }
+  .compat-person-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--gold-bright);
+    margin: 14px 0 0;
+  }
+  .compat-score { text-align: center; padding: 30px 8px 6px; }
+  .compat-score .cs-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 10px;
+  }
+  .compat-score .cs-num {
+    font-family: var(--serif);
+    font-size: clamp(4rem, 16vw, 5.6rem);
+    line-height: 1;
+    color: var(--gold-bright);
+    text-shadow: 0 0 60px rgba(216, 180, 90, 0.35);
+    font-variant-numeric: tabular-nums;
+  }
+  .compat-score .cs-verdict {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold-bright);
+    margin-top: 16px;
+  }
+  .compat-score .cs-names { color: var(--muted); font-size: 0.92rem; margin-top: 12px; }
+  .c-aspect { margin: 20px 0; }
+  .c-aspect-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .c-aspect-head .ca-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .c-aspect-head .ca-nums { color: var(--muted); font-family: var(--serif); font-size: 0.95rem; margin-left: 8px; letter-spacing: 0; text-transform: none; }
+  .c-aspect-head .ca-pct {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    color: var(--gold-bright);
+    font-variant-numeric: tabular-nums;
+  }
+  .c-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 8px 0 10px;
+  }
+  .c-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #c29a3f, #f0d489);
+    border-radius: 999px;
+  }
+  .c-text { color: var(--text); font-size: 0.92rem; max-width: 62ch; margin: 0; }
+
   footer {
     text-align: center;
     color: var(--muted);
@@ -679,6 +762,11 @@
     </section>
 
     <section class="panel">
+      <h2 class="panel-title">Career Blueprint</h2>
+      <div id="career-body"></div>
+    </section>
+
+    <section class="panel">
       <h2 class="panel-title">Metadata Results</h2>
       <div class="table-scroll">
         <table>
@@ -715,6 +803,38 @@
   <section class="panel" id="saved-panel" style="display:none">
     <h2 class="panel-title">Saved Profiles</h2>
     <div class="profiles" id="profiles-list"></div>
+  </section>
+
+  <section class="panel" id="compat-panel">
+    <h2 class="panel-title">Compatibility</h2>
+    <p class="harmony-note" style="margin:0">Enter two people to read how their core numbers interact — love, friendship, or business. If you've already decoded a profile above, Person One fills in automatically.</p>
+    <div class="compat-grid">
+      <div>
+        <p class="compat-person-title">Person One</p>
+        <label for="c1-name">Full birth name</label>
+        <input type="text" id="c1-name" placeholder="First person's full name" enterkeyhint="next" />
+        <label for="c1-m">Date of birth</label>
+        <div class="date-row">
+          <input type="text" id="c1-m" inputmode="numeric" maxlength="2" placeholder="MM" aria-label="Person one birth month" />
+          <input type="text" id="c1-d" inputmode="numeric" maxlength="2" placeholder="DD" aria-label="Person one birth day" />
+          <input type="text" id="c1-y" inputmode="numeric" maxlength="4" placeholder="YYYY" aria-label="Person one birth year" />
+        </div>
+      </div>
+      <div>
+        <p class="compat-person-title">Person Two</p>
+        <label for="c2-name">Full birth name</label>
+        <input type="text" id="c2-name" placeholder="Second person's full name" enterkeyhint="next" />
+        <label for="c2-m">Date of birth</label>
+        <div class="date-row">
+          <input type="text" id="c2-m" inputmode="numeric" maxlength="2" placeholder="MM" aria-label="Person two birth month" />
+          <input type="text" id="c2-d" inputmode="numeric" maxlength="2" placeholder="DD" aria-label="Person two birth day" />
+          <input type="text" id="c2-y" inputmode="numeric" maxlength="4" placeholder="YYYY" aria-label="Person two birth year" enterkeyhint="go" />
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="compat-btn" type="button">Read the Connection</button>
+    <p class="error" id="compat-error"></p>
+    <div id="compat-body" style="display:none"></div>
   </section>
 
   <footer>
@@ -1699,6 +1819,257 @@
     return notes;
   }
 
+  /* ============ Career blueprint ============ */
+
+  // Fields keyed by Expression — where the name's talents earn best.
+  var CAREER_FIELDS = {
+    1:  ["Founder / entrepreneur", "Executive leadership", "Sales & business development", "Solo practice / freelance", "Product pioneer"],
+    2:  ["Counseling & therapy", "Mediation & diplomacy", "Partnerships & HR", "Music & fine arts", "Operations & trusted support"],
+    3:  ["Writing & journalism", "Performance & entertainment", "Marketing & branding", "Design & visual arts", "Teaching & speaking"],
+    4:  ["Engineering", "Project & operations management", "Finance & accounting", "Construction & skilled trades", "Systems & logistics"],
+    5:  ["Media & communications", "Travel & hospitality", "Promotion & advertising", "Event production", "Emerging tech & startups"],
+    6:  ["Healthcare & healing arts", "Teaching & childcare", "Hospitality & service leadership", "Interior & experience design", "Community & family business"],
+    7:  ["Research & science", "Data & analysis", "Strategy & consulting", "Spiritual & philosophical teaching", "Specialist technical fields"],
+    8:  ["Business ownership", "Finance & investment", "Real estate & development", "Law & negotiation", "Executive management"],
+    9:  ["Arts & film", "Non-profit & advocacy", "Medicine & healing", "International work", "Teaching & mentorship"],
+    11: ["Inspirational media", "Coaching & counseling", "Innovation & invention", "Public speaking", "Art with a message"],
+    22: ["Large-scale enterprise", "Architecture & planning", "Institution & platform building", "Civic leadership", "Engineering at scale"],
+    33: ["Teaching & mentorship", "Healing professions", "Ministry & guidance", "Community leadership", "Creative direction that uplifts"]
+  };
+
+  // Career arc keyed by Life Path — the shape the working life keeps taking.
+  var CAREER_ARC = {
+    1:  "The career arc bends toward ownership: every role is training for the day this profile runs its own operation. Promotions matter less than autonomy — the fastest growth happens where decisions aren't second-guessed.",
+    2:  "The career arc bends toward the trusted-partner seat: the advisor, producer, or right hand whose influence is quiet but decisive. Power here is relational — built one alliance at a time.",
+    3:  "The career arc bends toward an audience: work keeps migrating toward writing, speaking, designing, performing — anywhere the voice reaches people. Visibility isn't vanity in this chart; it's the job.",
+    4:  "The career arc bends toward mastery of systems: the person who turns chaos into process and gets handed bigger messes each time. Seniority compounds here — this design gets more valuable every year.",
+    5:  "The career arc bends toward variety: multiple chapters, industries, even reinventions. The résumé looks restless until midlife, when the range itself becomes the credential.",
+    6:  "The career arc bends toward responsibility for people: teams, clients, patients, students. Advancement arrives by being the one everyone trusts with what matters most.",
+    7:  "The career arc bends toward expertise: the specialist, analyst, or authority whose depth can't be faked. The best career moves are the ones that buy uninterrupted focus.",
+    8:  "The career arc bends toward the top of the org chart — or ownership of it. This design is built to handle money, pressure, and scale; small stakes actively shrink it.",
+    9:  "The career arc bends toward mission: work keeps gravitating to causes, creativity, and impact beyond a paycheck. The most lucrative move is often the most meaningful one.",
+    11: "The career arc bends toward the message: whatever the industry, this profile ends up inspiring, translating vision, and lighting rooms up. The work matures when the vision gets a container.",
+    22: "The career arc bends toward the big build: institutions, platforms, bodies of work designed to outlast their maker. Think in decades — this chart already does.",
+    33: "The career arc bends toward lifting others: the teacher, healer, or mentor whose success is measured in people grown. Influence compounds through every life touched."
+  };
+
+  // What makes work sustainable, keyed by Soul Urge.
+  var CAREER_FUEL = {
+    1:  "Work only stays sustainable with real autonomy — a lane that is unmistakably yours.",
+    2:  "Work only stays sustainable inside genuine collaboration — being valued by people you trust.",
+    3:  "Work only stays sustainable with a creative outlet — somewhere the voice actually gets heard.",
+    4:  "Work only stays sustainable with stability and visible progress — clear ground rules, compounding results.",
+    5:  "Work only stays sustainable with variety — new problems, new rooms, room to move.",
+    6:  "Work only stays sustainable when you can see people helped — service with visible effect.",
+    7:  "Work only stays sustainable with depth — time to master, space to think.",
+    8:  "Work only stays sustainable with rising stakes — measurable wins and growing authority.",
+    9:  "Work only stays sustainable when it serves something larger than the paycheck.",
+    11: "Work only stays sustainable when it inspires — you and everyone downstream of you.",
+    22: "Work only stays sustainable when the project is big enough to still matter in twenty years.",
+    33: "Work only stays sustainable when someone is visibly growing because of it."
+  };
+
+  // Professional edge, keyed by Birth Day.
+  var CAREER_EDGE = {
+    1:  "starting things — first moves, cold opens, launches",
+    2:  "timing and reading the room in negotiations",
+    3:  "wordcraft — the pitch, the caption, the room-warming line",
+    4:  "follow-through — the plan that actually ships",
+    5:  "improvisation when plans meet reality",
+    6:  "hosting — making clients and teams feel held",
+    7:  "spotting the detail everyone else missed",
+    8:  "negotiation — knowing what things are worth",
+    9:  "perspective — reframing crises into plans",
+    11: "an uncanny first read on people and ideas",
+    22: "scaling — instinctively seeing the bigger version",
+    33: "mentorship — people do their best work near you"
+  };
+
+  function careerHTML(p) {
+    var ex = p.expression, lp = p.lifePath, su = p.soulUrge, bd = p.birthDay;
+    var html = "";
+
+    html += '<div class="ruling"><span class="r-num">' + esc(ex.display) + "</span>" +
+      '<span class="r-title">' + esc(CORE[ex.final].title) + " toolkit</span></div>";
+
+    html += '<p class="harmony-text">The <strong style="color:var(--gold-bright)">' + esc(ex.display) +
+      " Expression</strong> points to the fields where this name's talents convert most naturally into a living:</p>";
+
+    html += '<div class="field-chips">' + CAREER_FIELDS[ex.final].map(function (f) {
+      return '<span class="center-chip on">' + esc(f) + "</span>";
+    }).join("") + "</div>";
+
+    html += '<div class="hd-cards">' +
+      '<div class="hd-card"><div class="hd-label">The Arc — Life Path ' + esc(lp.display) + "</div>" +
+        esc(CAREER_ARC[lp.final]) + "</div>" +
+      '<div class="hd-card"><div class="hd-label">The Fuel — Soul Urge ' + esc(su.display) + "</div>" +
+        esc(CAREER_FUEL[su.final]) + "</div>" +
+      '<div class="hd-card"><div class="hd-label">The Edge — Birth Day ' + esc(bd.display) + "</div>" +
+        "The workplace superpower: " + esc(CAREER_EDGE[bd.final]) + ".</div>" +
+      "</div>";
+
+    html += '<p class="harmony-note">Fields come from the Expression (the full name’s talents), the arc from the Life Path, the fuel from the Soul Urge, and the edge from the Birth Day. Symbolic guidance — pair it with real-world skills and interests.</p>';
+    return html;
+  }
+
+  /* ============ Compatibility engine ============ */
+
+  // Symmetric affinity ratings (1–5) between reduced numbers 1–9.
+  var AFFINITY = {
+    1: { 1: 3, 2: 3, 3: 5, 4: 2, 5: 5, 6: 3, 7: 4, 8: 3, 9: 4 },
+    2: { 2: 4, 3: 3, 4: 5, 5: 2, 6: 5, 7: 3, 8: 5, 9: 4 },
+    3: { 3: 4, 4: 2, 5: 5, 6: 4, 7: 3, 8: 2, 9: 5 },
+    4: { 4: 4, 5: 2, 6: 4, 7: 5, 8: 5, 9: 2 },
+    5: { 5: 4, 6: 2, 7: 5, 8: 3, 9: 4 },
+    6: { 6: 5, 7: 2, 8: 4, 9: 5 },
+    7: { 7: 5, 8: 2, 9: 3 },
+    8: { 8: 3, 9: 3 },
+    9: { 9: 4 }
+  };
+
+  var RATING_PCT = { 1: 44, 2: 57, 3: 70, 4: 84, 5: 96 };
+
+  function reduceToDigit(n) {
+    while (n > 9) n = digitSum(n);
+    return n;
+  }
+
+  function pairRating(a, b) {
+    var x = reduceToDigit(a), y = reduceToDigit(b);
+    var lo = Math.min(x, y), hi = Math.max(x, y);
+    return AFFINITY[lo][hi];
+  }
+
+  var COMPAT_ASPECTS = [
+    { key: "lifePath",    label: "Life Direction",   weight: 0.40 },
+    { key: "soulUrge",    label: "Heart Connection", weight: 0.25 },
+    { key: "expression",  label: "Talent Blend",     weight: 0.20 },
+    { key: "personality", label: "Day-to-Day Vibe",  weight: 0.15 }
+  ];
+
+  // {A} and {B} are replaced with the two ROLES phrases.
+  var COMPAT_TEXT = {
+    lifePath: {
+      5: "These two roads run the same direction at the same speed — {A} and {B} recognize each other on sight. Plans, ambitions, and instincts about the future tend to line up without negotiation.",
+      4: "The life directions support each other naturally: {A} opens doors that {B} is glad to walk through. Long-term visions differ in style, not substance.",
+      3: "Two parallel roads — close enough to travel together, distinct enough that each keeps their own map. The partnership works when neither insists the other's route is wrong.",
+      2: "The paths pull at different speeds: {A} on one clock, {B} on another. This pairing needs regular, explicit conversations about the future so nobody quietly drifts.",
+      1: "These directions genuinely diverge — {A} and {B} are being built by life for different assignments. It can absolutely work, but the relationship must be chosen daily, not assumed."
+    },
+    soulUrge: {
+      5: "The hearts want the same thing underneath it all. Private motivations rarely need explaining — one look and both feel understood.",
+      4: "What each heart wants feeds the other's want: one's satisfaction creates the conditions for the other's. Emotional generosity comes easily here.",
+      3: "The hearts run on different fuel, but neither starves the other. Understanding takes a real conversation instead of a glance — worth having often.",
+      2: "The private wants tug in different directions: what recharges one can drain the other. Naming needs out loud, early, keeps this from becoming silent scorekeeping.",
+      1: "The deep wants are near-opposites, which makes this bond a masterclass in empathy. Handled consciously it's transformative; on autopilot it frays."
+    },
+    expression: {
+      5: "The talent sets interlock like gears — {A} plus {B} covers more ground than either alone. A natural team for projects, business, or building a life.",
+      4: "The gifts complement more than they overlap: each is strong precisely where the other is casual. Divide the labor along those lines and things get done fast.",
+      3: "The toolkits overlap in places and diverge in others — collaboration works with clear roles. Without them, both may reach for the same wheel.",
+      2: "The working styles genuinely differ: pace, standards, and method won't sync on their own. Agreements beat assumptions in every shared project.",
+      1: "Two very different operating systems. As collaborators it demands patience; as partners it demands respect for methods that will never look like your own."
+    },
+    personality: {
+      5: "Up close, the daily energies match — the same humor, the same rhythm, the same read on a room. Being together feels low-effort from day one.",
+      4: "First impressions landed true and still hold: each finds the other easy company. The surface chemistry gives the deeper layers room to grow.",
+      3: "The outer styles differ enough to keep things interesting — {A} meets {B} and both stay a little curious. Friction, when it comes, is mostly stylistic.",
+      2: "The day-to-day rhythms clash at times: one person's normal reads as too much (or too little) to the other. Most flare-ups here are style, not substance — name them that way.",
+      1: "Very different daily wavelengths — how each moves through an ordinary Tuesday barely resembles the other. Shared rituals become the bridge."
+    }
+  };
+
+  var COMPAT_ADVICE = {
+    lifePath: "The growth work lives in the long view: put shared plans on the calendar and revisit them — where this is going shouldn't be a guess.",
+    soulUrge: "The growth work is emotional translation: say the want beneath the want. Neither heart should have to be decoded from clues.",
+    expression: "The growth work is in how you build together: define who owns what, then let each work their own way inside it.",
+    personality: "The growth work is daily rhythm: build small shared rituals so two different wavelengths get a common beat."
+  };
+
+  var COMPAT_VERDICTS = [
+    { min: 90, label: "Soul-Deep Match",
+      text: "A rare level of numerical agreement — the currents in both charts reinforce each other almost everywhere. The risk isn't conflict; it's complacency. Keep choosing it on purpose." },
+    { min: 78, label: "Natural Harmony",
+      text: "The charts move in the same key with enough contrast to stay interesting. Most friction resolves on its own, and the connection compounds with time." },
+    { min: 64, label: "Workable Chemistry",
+      text: "Real affinity with real differences. This is the classic strong pairing: the numbers supply the spark, and communication supplies the staying power." },
+    { min: 50, label: "Growth Pairing",
+      text: "The charts differ more than they match — which is exactly what makes this bond catalytic. Each becomes more complete by learning the other's current." },
+    { min: 0, label: "Refining Fire",
+      text: "Nearly opposite designs. Chosen consciously, this is the pairing people write books about; on autopilot, it burns hot and fast. Intention is everything." }
+  ];
+
+  function computeCompatibility(p1, p2) {
+    var aspects = COMPAT_ASPECTS.map(function (a) {
+      var x = p1[a.key].final, y = p2[a.key].final;
+      var rating = pairRating(x, y);
+      var pct = RATING_PCT[rating];
+      if (x === y) pct = Math.max(pct, 88); // identical numbers resonate even when the matrix is lukewarm
+      var text = COMPAT_TEXT[a.key][rating]
+        .replace("{A}", ROLES[x])
+        .replace("{B}", ROLES[y]);
+      return { key: a.key, label: a.label, weight: a.weight, a: x, b: y,
+               aDisplay: p1[a.key].display, bDisplay: p2[a.key].display,
+               rating: rating, pct: pct, text: text };
+    });
+
+    var overall = Math.round(aspects.reduce(function (s, a) { return s + a.pct * a.weight; }, 0));
+    var verdict = COMPAT_VERDICTS.filter(function (v) { return overall >= v.min; })[0];
+
+    var weakest = aspects.reduce(function (w, a) { return a.pct < w.pct ? a : w; }, aspects[0]);
+    var shared = aspects.filter(function (a) { return a.a === a.b; });
+
+    var masters = [];
+    [[p1, "one"], [p2, "two"]].forEach(function (pair) {
+      COMPAT_ASPECTS.forEach(function (a) {
+        if (pair[0][a.key].isMaster) masters.push("Person " + pair[1] + " carries master " + pair[0][a.key].final + " in " + a.label);
+      });
+    });
+
+    return { p1: p1, p2: p2, overall: overall, verdict: verdict,
+             aspects: aspects, weakest: weakest, shared: shared, masters: masters };
+  }
+
+  function compatHTML(c) {
+    var html = "";
+
+    html += '<div class="compat-score reveal">' +
+      '<span class="cs-label">Connection Index</span>' +
+      '<div class="cs-num">' + c.overall + '%</div>' +
+      '<div><span class="cs-verdict">' + esc(c.verdict.label) + "</span></div>" +
+      '<p class="cs-names">' + esc(c.p1.name) + " · Life Path " + esc(c.p1.lifePath.display) +
+      " &nbsp;+&nbsp; " + esc(c.p2.name) + " · Life Path " + esc(c.p2.lifePath.display) + "</p></div>";
+
+    html += '<p class="harmony-text" style="margin-top:16px">' + esc(c.verdict.text) +
+      " This pairing joins " + esc(ROLES[c.p1.lifePath.final]) + " with " + esc(ROLES[c.p2.lifePath.final]) + ".</p>";
+
+    html += c.aspects.map(function (a) {
+      return '<div class="c-aspect">' +
+        '<div class="c-aspect-head"><span class="ca-label">' + esc(a.label) +
+        '<span class="ca-nums">' + esc(a.aDisplay) + " · " + esc(a.bDisplay) + "</span></span>" +
+        '<span class="ca-pct">' + a.pct + "%</span></div>" +
+        '<div class="c-bar"><div class="c-fill" style="width:' + a.pct + '%"></div></div>' +
+        '<p class="c-text">' + esc(a.text) + "</p></div>";
+    }).join("");
+
+    if (c.shared.length) {
+      html += '<div class="karmic"><div class="karmic-title">Mirror Numbers</div><p>Identical ' +
+        esc(c.shared.map(function (a) { return a.label + " (" + a.a + ")"; }).join(", ")) +
+        " — the places these two are the same person. Instant understanding there, but also shared blind spots: no one is holding the other side of that particular coin.</p></div>";
+    }
+
+    if (c.masters.length) {
+      html += '<div class="karmic"><div class="karmic-title">Master Number Voltage</div><p>' +
+        esc(c.masters.join("; ")) + ". Master numbers add intensity to a bond — more inspiration, more pressure, more to grow into together.</p></div>";
+    }
+
+    html += '<p class="harmony-text" style="margin-top:18px"><strong style="color:var(--gold-bright)">Where the work is:</strong> ' +
+      esc(COMPAT_ADVICE[c.weakest.key]) + "</p>";
+
+    html += '<p class="harmony-note">Weighted blend: Life Direction 40% · Heart Connection 25% · Talent Blend 20% · Day-to-Day Vibe 15%. Symbolic reading for reflection and fun — real compatibility is built, not calculated.</p>';
+    return html;
+  }
+
   /* ============ Profile computation ============ */
 
   function computeProfile(name, dobISO, calledName) {
@@ -1758,6 +2129,7 @@
     document.getElementById("hd-body").innerHTML = p.hd
       ? hdHTML(p.hd, p.hdTimeKnown)
       : '<p class="harmony-note">Add a birth time above (or check “I don’t know my birth time”) and decode again to see the Human Design chart.</p>';
+    document.getElementById("career-body").innerHTML = careerHTML(p);
 
     var grid = document.getElementById("num-grid");
     grid.innerHTML = LAYER_DEFS.map(function (d) {
@@ -1824,6 +2196,12 @@
       lines.push("   " + r.trace);
       lines.push("   " + LAYER_MEANINGS[d[0]][r.final]);
     });
+    lines.push("");
+    lines.push("CAREER BLUEPRINT (Expression " + p.expression.display + " — " + CORE[p.expression.final].title + ")");
+    lines.push("   Fields: " + CAREER_FIELDS[p.expression.final].join(", "));
+    lines.push("   " + CAREER_ARC[p.lifePath.final]);
+    lines.push("   Fuel: " + CAREER_FUEL[p.soulUrge.final]);
+    lines.push("   Edge: " + CAREER_EDGE[p.birthDay.final]);
     lines.push("");
     lines.push("PATTERN: " + patternStatement(p));
     var notes = karmicNotes(p);
@@ -2050,12 +2428,12 @@
 
   function pad2(n) { return (n < 10 ? "0" : "") + n; }
 
-  // Build a validated ISO date from the three explicit fields, or return
+  // Build a validated ISO date from three explicit fields, or return
   // an error string. Month/day/year are never inferred from locale.
-  function readDateFields() {
-    var m = parseInt(document.getElementById("dob-m").value, 10);
-    var d = parseInt(document.getElementById("dob-d").value, 10);
-    var yRaw = document.getElementById("dob-y").value.trim();
+  function readDateTriple(mId, dId, yId) {
+    var m = parseInt(document.getElementById(mId).value, 10);
+    var d = parseInt(document.getElementById(dId).value, 10);
+    var yRaw = document.getElementById(yId).value.trim();
     var y = parseInt(yRaw, 10);
     if (isNaN(m) || isNaN(d) || isNaN(y)) return { error: "Enter the birth date as month, day, and 4-digit year." };
     if (yRaw.length !== 4) return { error: "Enter the year as 4 digits (e.g. 1982)." };
@@ -2067,6 +2445,8 @@
     }
     return { iso: y + "-" + pad2(m) + "-" + pad2(d) };
   }
+
+  function readDateFields() { return readDateTriple("dob-m", "dob-d", "dob-y"); }
 
   function setDateFields(iso) {
     var parts = (iso || "").split("-");
@@ -2114,6 +2494,47 @@
     });
   });
 
+  /* ---- Compatibility form ---- */
+
+  function showCompatError(msg) {
+    var el = document.getElementById("compat-error");
+    el.textContent = msg;
+    el.style.display = msg ? "block" : "none";
+  }
+
+  function handleCompat() {
+    // Person One inherits the main form if left blank
+    if (!cleanLetters(document.getElementById("c1-name").value) &&
+        cleanLetters(document.getElementById("name").value)) {
+      document.getElementById("c1-name").value = document.getElementById("name").value;
+      document.getElementById("c1-m").value = document.getElementById("dob-m").value;
+      document.getElementById("c1-d").value = document.getElementById("dob-d").value;
+      document.getElementById("c1-y").value = document.getElementById("dob-y").value;
+    }
+    var n1 = document.getElementById("c1-name").value;
+    var n2 = document.getElementById("c2-name").value;
+    if (!cleanLetters(n1)) { showCompatError("Enter Person One's full name using letters A–Z."); return; }
+    if (!cleanLetters(n2)) { showCompatError("Enter Person Two's full name using letters A–Z."); return; }
+    var d1 = readDateTriple("c1-m", "c1-d", "c1-y");
+    if (d1.error) { showCompatError("Person One: " + d1.error); return; }
+    var d2 = readDateTriple("c2-m", "c2-d", "c2-y");
+    if (d2.error) { showCompatError("Person Two: " + d2.error); return; }
+    showCompatError("");
+
+    var comp = computeCompatibility(computeProfile(n1, d1.iso), computeProfile(n2, d2.iso));
+    var body = document.getElementById("compat-body");
+    body.innerHTML = compatHTML(comp);
+    body.style.display = "block";
+    body.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  document.getElementById("compat-btn").addEventListener("click", handleCompat);
+  ["c1-name", "c1-m", "c1-d", "c1-y", "c2-name", "c2-m", "c2-d", "c2-y"].forEach(function (id) {
+    document.getElementById(id).addEventListener("keydown", function (e) {
+      if (e.key === "Enter") handleCompat();
+    });
+  });
+
   // Time-zone dropdown: common US zones first, then the full UTC range
   (function buildTzOptions() {
     var sel = document.getElementById("bt-tz");
@@ -2150,7 +2571,9 @@
   });
 
   // Digits only + auto-advance across the three date boxes
-  [["dob-m", "dob-d"], ["dob-d", "dob-y"], ["dob-y", null]].forEach(function (pair) {
+  [["dob-m", "dob-d"], ["dob-d", "dob-y"], ["dob-y", null],
+   ["c1-m", "c1-d"], ["c1-d", "c1-y"], ["c1-y", null],
+   ["c2-m", "c2-d"], ["c2-d", "c2-y"], ["c2-y", null]].forEach(function (pair) {
     var el = document.getElementById(pair[0]);
     el.addEventListener("input", function () {
       el.value = el.value.replace(/\D/g, "");
@@ -2260,6 +2683,10 @@
     triadOf: triadOf,
     nameReadingHTML: nameReadingHTML,
     harmonyHTML: harmonyHTML,
+    careerHTML: careerHTML,
+    computeCompatibility: computeCompatibility,
+    compatHTML: compatHTML,
+    pairRating: pairRating,
     computeHumanDesign: computeHumanDesign,
     sunLongitude: sunLongitude,
     moonLongitude: moonLongitude,
