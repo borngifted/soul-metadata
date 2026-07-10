@@ -819,6 +819,13 @@
           <input type="text" id="c1-d" inputmode="numeric" maxlength="2" placeholder="DD" aria-label="Person one birth day" />
           <input type="text" id="c1-y" inputmode="numeric" maxlength="4" placeholder="YYYY" aria-label="Person one birth year" />
         </div>
+        <label for="c1-h">Birth time — optional</label>
+        <div class="time-row">
+          <input type="text" id="c1-h" inputmode="numeric" maxlength="2" placeholder="HH" aria-label="Person one birth hour" />
+          <input type="text" id="c1-min" inputmode="numeric" maxlength="2" placeholder="MM" aria-label="Person one birth minute" />
+          <select id="c1-ap" aria-label="Person one AM or PM"><option>AM</option><option>PM</option></select>
+          <select id="c1-tz" aria-label="Person one time zone at birth"></select>
+        </div>
       </div>
       <div>
         <p class="compat-person-title">Person Two</p>
@@ -830,8 +837,16 @@
           <input type="text" id="c2-d" inputmode="numeric" maxlength="2" placeholder="DD" aria-label="Person two birth day" />
           <input type="text" id="c2-y" inputmode="numeric" maxlength="4" placeholder="YYYY" aria-label="Person two birth year" enterkeyhint="go" />
         </div>
+        <label for="c2-h">Birth time — optional</label>
+        <div class="time-row">
+          <input type="text" id="c2-h" inputmode="numeric" maxlength="2" placeholder="HH" aria-label="Person two birth hour" />
+          <input type="text" id="c2-min" inputmode="numeric" maxlength="2" placeholder="MM" aria-label="Person two birth minute" />
+          <select id="c2-ap" aria-label="Person two AM or PM"><option>AM</option><option>PM</option></select>
+          <select id="c2-tz" aria-label="Person two time zone at birth"></select>
+        </div>
       </div>
     </div>
+    <p class="harmony-note" style="margin:14px 0 0">Add both birth times to include the Human Design pairing — how the two energy types and bodygraphs interact.</p>
     <button class="btn btn-primary" id="compat-btn" type="button">Read the Connection</button>
     <p class="error" id="compat-error"></p>
     <div id="compat-body" style="display:none"></div>
@@ -2066,7 +2081,116 @@
     html += '<p class="harmony-text" style="margin-top:18px"><strong style="color:var(--gold-bright)">Where the work is:</strong> ' +
       esc(COMPAT_ADVICE[c.weakest.key]) + "</p>";
 
+    if (c.hdPair) {
+      html += hdPairHTML(c.hdPair, c.p1.name, c.p2.name);
+    } else {
+      html += '<p class="harmony-note" style="margin-top:16px">Add both birth times above and read again to include the Human Design pairing — types, strategies, and the connection channels the two bodygraphs form together.</p>';
+    }
+
     html += '<p class="harmony-note">Weighted blend: Life Direction 40% · Heart Connection 25% · Talent Blend 20% · Day-to-Day Vibe 15%. Symbolic reading for reflection and fun — real compatibility is built, not calculated.</p>';
+
+    html += '<div class="actions" style="margin-top:18px">' +
+      '<button class="btn" type="button" id="compat-share-btn">Text the Card</button>' +
+      '<button class="btn" type="button" id="compat-download-btn">Download Card</button></div>';
+    return html;
+  }
+
+  /* ============ Human Design pairing ============ */
+
+  var HD_TYPE_ORDER = ["Manifestor", "Generator", "Manifesting Generator", "Projector", "Reflector"];
+
+  // Keyed by the two types in HD_TYPE_ORDER order, joined with "|".
+  var HD_TYPE_PAIRS = {
+    "Manifestor|Manifestor": "Two initiators — a relationship of parallel launches. It thrives when both inform each other before acting; two urges to move without warning is where sparks turn to burns.",
+    "Manifestor|Generator": "The initiator and the life force: one starts, the other builds it out with sustainable energy. It works beautifully when the Manifestor informs and the Generator gets real things to respond to rather than orders.",
+    "Manifestor|Manifesting Generator": "Two fast movers — the Manifestor opens the track and the MG sprints down it, often overtaking. Informing each other keeps all that speed from becoming collision.",
+    "Manifestor|Projector": "The initiator and the guide: the Projector sees exactly how the Manifestor's impact could land better — but the insight only lands when invited. Impact plus vision, when the timing is honored.",
+    "Manifestor|Reflector": "The initiator and the mirror: the Reflector shows the Manifestor the true effect of their impact like no one else can. Patience with the Reflector's lunar pace is the price of that clarity.",
+    "Generator|Generator": "Two life forces — steady, warm, and built for shared work. The bond stays alive by asking each other real yes/no questions and never making the other push through a gut 'no'.",
+    "Generator|Manifesting Generator": "Both run on Sacral power, so energy is rarely the issue — pace is. The MG skips steps the Generator wants to savor; naming that difference turns friction into range.",
+    "Generator|Projector": "The classic pairing: the Generator supplies the energy, the Projector sees how to aim it. It works when the Generator invites the guidance and the Projector waits to be asked.",
+    "Generator|Reflector": "The life force and the mirror: the Reflector can taste whether the Generator's energy is healthy before the Generator feels it. Give big decisions a lunar month and this pairing rarely missteps.",
+    "Manifesting Generator|Manifesting Generator": "Two multi-track builders — a whirlwind of parallel projects. The bond thrives when both accept that dropped projects and changed lanes are design, not flakiness.",
+    "Manifesting Generator|Projector": "Energy meets insight at speed: the Projector can see which of the MG's many tracks is the live one. Invitation is everything — uninvited steering reads as brakes.",
+    "Manifesting Generator|Reflector": "The many-track builder and the mirror: the Reflector samples the MG's whirlwind and reflects it back honestly. Slow moon, fast engine — this works on the Reflector's timeline, not the MG's.",
+    "Projector|Projector": "Two guides with no motor between them — rich in recognition, insight, and conversation. The pairing must guard its rest fiercely and resist the urge to manage each other.",
+    "Projector|Reflector": "Two non-energy beings — deeply perceptive company. Together they read rooms, people, and systems like open books; together they also need serious rest and carefully chosen environments.",
+    "Reflector|Reflector": "Two mirrors — the rarest pairing there is. Each reflects their environment more than a fixed self, so where this pair lives and who surrounds them matters more than anything either of them 'is'."
+  };
+
+  function typePairKey(t1, t2) {
+    return HD_TYPE_ORDER.indexOf(t1) <= HD_TYPE_ORDER.indexOf(t2) ? t1 + "|" + t2 : t2 + "|" + t1;
+  }
+
+  function gateSetOf(hd) {
+    var s = {};
+    HD_BODIES.forEach(function (b) {
+      s[hd.personality[b].gate] = true;
+      s[hd.design[b].gate] = true;
+    });
+    return s;
+  }
+
+  // Classify every channel the two charts form together:
+  //   electromagnetic — each supplies a missing half (classic chemistry)
+  //   companionship  — both carry the whole channel (easy familiarity)
+  //   dominance      — one carries it whole, the other has neither gate
+  //   compromise     — one carries it whole, the other only half-plugs in
+  function computeHDPairing(hd1, hd2) {
+    var A = gateSetOf(hd1), B = gateSetOf(hd2);
+    var groups = { electromagnetic: [], companionship: [], dominance: [], compromise: [] };
+    HD_CHANNELS.forEach(function (ch) {
+      var fullA = A[ch[0]] && A[ch[1]], fullB = B[ch[0]] && B[ch[1]];
+      if (fullA && fullB) groups.companionship.push(ch);
+      else if (fullA || fullB) {
+        var other = fullA ? B : A;
+        (other[ch[0]] || other[ch[1]] ? groups.compromise : groups.dominance).push(ch);
+      } else if ((A[ch[0]] || B[ch[0]]) && (A[ch[1]] || B[ch[1]])) {
+        groups.electromagnetic.push(ch);
+      }
+    });
+    return {
+      type1: hd1.type, type2: hd2.type,
+      text: HD_TYPE_PAIRS[typePairKey(hd1.type, hd2.type)],
+      groups: groups
+    };
+  }
+
+  var HD_GROUP_META = {
+    electromagnetic: ["Electromagnetic", "each of you supplies the half the other is missing — the built-in attraction circuits of this pairing"],
+    companionship:   ["Companionship", "channels you both carry whole — easy, familiar, nothing to negotiate"],
+    dominance:       ["Dominance", "one carries the whole channel, the other none of it — teacher-and-student energy; conditioning flows one way"],
+    compromise:      ["Compromise", "one runs the whole channel while the other half-plugs in — mild friction over who drives it"]
+  };
+
+  function hdPairHTML(hp, name1, name2) {
+    var html = "";
+    html += '<div class="hd-label" style="font-family:var(--mono);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin:26px 0 10px">Energy Mechanics — Human Design</div>';
+    html += '<div class="hd-type"><span class="ht-name" style="font-size:1.6rem">' + esc(hp.type1) + " + " + esc(hp.type2) + "</span></div>";
+    html += '<p class="hd-lede" style="margin-bottom:14px">' + esc(hp.text) + "</p>";
+    html += '<p class="c-text" style="margin-bottom:6px">' + esc(firstName(name1)) + " keeps their <strong style=\"color:var(--gold-bright)\">" +
+      esc(HD_TYPES[hp.type1].strategy) + "</strong> strategy inside the relationship; " + esc(firstName(name2)) +
+      " keeps <strong style=\"color:var(--gold-bright)\">" + esc(HD_TYPES[hp.type2].strategy) + "</strong>.</p>";
+
+    Object.keys(HD_GROUP_META).forEach(function (k) {
+      var chs = hp.groups[k];
+      if (!chs.length) return;
+      var meta = HD_GROUP_META[k];
+      html += '<div class="hd-label" style="font-family:var(--mono);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px">' +
+        esc(meta[0]) + " · " + chs.length + "</div>";
+      html += '<div class="centers-grid">' + chs.map(function (ch) {
+        return '<span class="center-chip on">' + ch[0] + "–" + ch[1] + " · " +
+          esc(GATE_CENTER[ch[0]]) + "↔" + esc(GATE_CENTER[ch[1]]) + "</span>";
+      }).join("") + "</div>";
+      html += '<p class="harmony-note" style="margin:6px 0 0">' + esc(meta[1]) + ".</p>";
+    });
+
+    if (!hp.groups.electromagnetic.length && !hp.groups.companionship.length &&
+        !hp.groups.dominance.length && !hp.groups.compromise.length) {
+      html += '<p class="harmony-note">No connection channels form between these two bodygraphs — the bond runs on the numbers and on choice more than on hardwired electromagnetics.</p>';
+    }
+
+    html += '<p class="hd-note">Connection channels are counted across both charts (Personality + Design gates of each person). Inspired by Human Design partnership analysis — interpretations are original.</p>';
     return html;
   }
 
@@ -2337,6 +2461,118 @@
     return "soul-metadata-" + p.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".png";
   }
 
+  /* ---- Compatibility card ---- */
+
+  function drawCompatCard(c) {
+    var W = 1080, H = 1350;
+    var cv = document.createElement("canvas");
+    cv.width = W; cv.height = H;
+    var ctx = cv.getContext("2d");
+
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, "#1c1a2b");
+    g.addColorStop(0.4, "#0b0b11");
+    g.addColorStop(1, "#0e0c16");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = "rgba(216,180,90,0.5)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(40, 40, W - 80, H - 80);
+    ctx.strokeStyle = "rgba(216,180,90,0.18)";
+    ctx.strokeRect(52, 52, W - 104, H - 104);
+
+    var serif = '"Didot","Bodoni 72",Georgia,serif';
+    var mono = '"SF Mono",Menlo,monospace';
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#d8b45a";
+    ctx.font = "600 28px " + mono;
+    ctx.fillText("S O U L   M E T A D A T A", W / 2, 130);
+    ctx.fillStyle = "#a09eae";
+    ctx.font = "600 22px " + mono;
+    ctx.fillText("C O M P A T I B I L I T Y", W / 2, 170);
+
+    function fitName(nm) { return nm.length > 24 ? 38 : 48; }
+    ctx.fillStyle = "#f2edde";
+    var n1 = c.p1.name.toUpperCase(), n2 = c.p2.name.toUpperCase();
+    ctx.font = "400 " + fitName(n1) + "px " + serif;
+    ctx.fillText(n1, W / 2, 250);
+    ctx.fillStyle = "#d8b45a";
+    ctx.font = "italic 34px " + serif;
+    ctx.fillText("+", W / 2, 300);
+    ctx.fillStyle = "#f2edde";
+    ctx.font = "400 " + fitName(n2) + "px " + serif;
+    ctx.fillText(n2, W / 2, 355);
+
+    ctx.fillStyle = "#a09eae";
+    ctx.font = "24px " + mono;
+    ctx.fillText("Life Path " + c.p1.lifePath.display + "  ·  Life Path " + c.p2.lifePath.display, W / 2, 402);
+
+    var glow = ctx.createRadialGradient(W / 2, 590, 30, W / 2, 590, 300);
+    glow.addColorStop(0, "rgba(216,180,90,0.28)");
+    glow.addColorStop(1, "rgba(216,180,90,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 330, W, 560);
+
+    ctx.fillStyle = "#a09eae";
+    ctx.font = "24px " + mono;
+    ctx.fillText("C O N N E C T I O N   I N D E X", W / 2, 480);
+
+    ctx.fillStyle = "#f0d489";
+    ctx.font = "400 210px " + serif;
+    ctx.fillText(c.overall + "%", W / 2, 665);
+
+    ctx.fillStyle = "#f2edde";
+    ctx.font = "italic 46px " + serif;
+    ctx.fillText(c.verdict.label, W / 2, 740);
+
+    var barTop = 800;
+    if (c.hdPair) {
+      ctx.fillStyle = "#d8b45a";
+      ctx.font = "26px " + mono;
+      ctx.fillText(c.hdPair.type1.toUpperCase() + "  +  " + c.hdPair.type2.toUpperCase(), W / 2, 795);
+      barTop = 850;
+    }
+
+    c.aspects.forEach(function (a, i) {
+      var y = barTop + i * 105;
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#a09eae";
+      ctx.font = "22px " + mono;
+      ctx.fillText(a.label.toUpperCase() + "   " + a.aDisplay + " · " + a.bDisplay, 120, y);
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#f0d489";
+      ctx.font = "400 34px " + serif;
+      ctx.fillText(a.pct + "%", W - 120, y + 2);
+      ctx.fillStyle = "rgba(255,255,255,0.1)";
+      ctx.fillRect(120, y + 20, W - 240, 10);
+      var bg = ctx.createLinearGradient(120, 0, W - 120, 0);
+      bg.addColorStop(0, "#c29a3f");
+      bg.addColorStop(1, "#f0d489");
+      ctx.fillStyle = bg;
+      ctx.fillRect(120, y + 20, (W - 240) * a.pct / 100, 10);
+    });
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(160,158,174,0.7)";
+    ctx.font = "18px " + mono;
+    ctx.fillText("Symbolic numerology — for reflection & fun", W / 2, 1290);
+
+    return cv;
+  }
+
+  function compatCardBlob(c) {
+    return new Promise(function (resolve) {
+      drawCompatCard(c).toBlob(resolve, "image/png");
+    });
+  }
+
+  function compatCardFileName(c) {
+    function slug(n) { return n.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-"); }
+    return "soul-metadata-compat-" + slug(c.p1.name) + "-" + slug(c.p2.name) + ".png";
+  }
+
   /* ============ Storage ============ */
 
   var STORE_KEY = "soulMetadataProfiles";
@@ -2502,6 +2738,21 @@
     el.style.display = msg ? "block" : "none";
   }
 
+  // Optional birth time: both fields blank means "skip the HD pairing".
+  function readTimeTriple(hId, mId, apId) {
+    var hRaw = document.getElementById(hId).value.trim();
+    var mRaw = document.getElementById(mId).value.trim();
+    if (!hRaw && !mRaw) return { skip: true };
+    var h = parseInt(hRaw, 10);
+    var mm = parseInt(mRaw || "0", 10);
+    if (isNaN(h) || h < 1 || h > 12) return { error: "birth hour must be 1–12 (or leave the time blank)." };
+    if (isNaN(mm) || mm < 0 || mm > 59) return { error: "birth minutes must be 00–59." };
+    var ap = document.getElementById(apId).value;
+    return { h24: (h % 12) + (ap === "PM" ? 12 : 0), min: mm };
+  }
+
+  var currentCompat = null;
+
   function handleCompat() {
     // Person One inherits the main form if left blank
     if (!cleanLetters(document.getElementById("c1-name").value) &&
@@ -2510,6 +2761,13 @@
       document.getElementById("c1-m").value = document.getElementById("dob-m").value;
       document.getElementById("c1-d").value = document.getElementById("dob-d").value;
       document.getElementById("c1-y").value = document.getElementById("dob-y").value;
+      var mainTime = readTimeFields();
+      if (mainTime.known) {
+        document.getElementById("c1-h").value = document.getElementById("bt-h").value;
+        document.getElementById("c1-min").value = document.getElementById("bt-min").value;
+        document.getElementById("c1-ap").value = document.getElementById("bt-ap").value;
+        document.getElementById("c1-tz").value = document.getElementById("bt-tz").value;
+      }
     }
     var n1 = document.getElementById("c1-name").value;
     var n2 = document.getElementById("c2-name").value;
@@ -2519,14 +2777,57 @@
     if (d1.error) { showCompatError("Person One: " + d1.error); return; }
     var d2 = readDateTriple("c2-m", "c2-d", "c2-y");
     if (d2.error) { showCompatError("Person Two: " + d2.error); return; }
+    var t1 = readTimeTriple("c1-h", "c1-min", "c1-ap");
+    if (t1.error) { showCompatError("Person One: " + t1.error); return; }
+    var t2 = readTimeTriple("c2-h", "c2-min", "c2-ap");
+    if (t2.error) { showCompatError("Person Two: " + t2.error); return; }
     showCompatError("");
 
     var comp = computeCompatibility(computeProfile(n1, d1.iso), computeProfile(n2, d2.iso));
+    if (!t1.skip && !t2.skip) {
+      var hd1 = computeHumanDesign(d1.iso, t1.h24, t1.min, parseFloat(document.getElementById("c1-tz").value));
+      var hd2 = computeHumanDesign(d2.iso, t2.h24, t2.min, parseFloat(document.getElementById("c2-tz").value));
+      comp.hdPair = computeHDPairing(hd1, hd2);
+    }
+    currentCompat = comp;
     var body = document.getElementById("compat-body");
     body.innerHTML = compatHTML(comp);
     body.style.display = "block";
     body.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+
+  // Card buttons live inside re-rendered HTML — delegate from the container.
+  document.getElementById("compat-body").addEventListener("click", function (e) {
+    var id = e.target && e.target.id;
+    if (!currentCompat) return;
+    if (id === "compat-download-btn") {
+      compatCardBlob(currentCompat).then(function (blob) {
+        if (!blob) { toast("Could not create the card image"); return; }
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = compatCardFileName(currentCompat);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+        toast("Card saved — check your downloads");
+      });
+    } else if (id === "compat-share-btn") {
+      var c = currentCompat;
+      compatCardBlob(c).then(function (blob) {
+        var file = blob ? new File([blob], compatCardFileName(c), { type: "image/png" }) : null;
+        var text = c.p1.name + " + " + c.p2.name + " · " + c.overall + "% · " + c.verdict.label;
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: "Soul Metadata Compatibility", text: text }).catch(function () {});
+        } else if (navigator.share) {
+          navigator.share({ title: "Soul Metadata Compatibility", text: text }).catch(function () {});
+        } else {
+          toast("Sharing isn’t supported here — use Download Card instead");
+        }
+      });
+    }
+  });
 
   document.getElementById("compat-btn").addEventListener("click", handleCompat);
   ["c1-name", "c1-m", "c1-d", "c1-y", "c2-name", "c2-m", "c2-d", "c2-y"].forEach(function (id) {
@@ -2535,9 +2836,9 @@
     });
   });
 
-  // Time-zone dropdown: common US zones first, then the full UTC range
-  (function buildTzOptions() {
-    var sel = document.getElementById("bt-tz");
+  // Time-zone dropdowns: common US zones first, then the full UTC range
+  function buildTzOptions(selId) {
+    var sel = document.getElementById(selId);
     var named = [
       [-5, "Eastern (winter) UTC-5"], [-4, "Eastern DST UTC-4"],
       [-6, "Central (winter) UTC-6"], [-5.01, null],
@@ -2561,7 +2862,8 @@
       sel.appendChild(opt2);
     }
     sel.value = "-5";
-  })();
+  }
+  ["bt-tz", "c1-tz", "c2-tz"].forEach(buildTzOptions);
 
   document.getElementById("bt-unknown").addEventListener("change", function () {
     var off = this.checked;
@@ -2687,6 +2989,9 @@
     computeCompatibility: computeCompatibility,
     compatHTML: compatHTML,
     pairRating: pairRating,
+    computeHDPairing: computeHDPairing,
+    hdPairHTML: hdPairHTML,
+    drawCompatCard: drawCompatCard,
     computeHumanDesign: computeHumanDesign,
     sunLongitude: sunLongitude,
     moonLongitude: moonLongitude,
