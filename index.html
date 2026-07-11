@@ -4,21 +4,25 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Soul Metadata</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z'/%3E%3C/svg%3E" />
 <style>
   :root {
-    --bg: #0b0b11;
-    --bg-glow: #1c1a2b;
-    --panel: rgba(255, 255, 255, 0.035);
-    --panel-solid: #15141d;
-    --line: rgba(216, 180, 90, 0.18);
-    --line-soft: rgba(255, 255, 255, 0.08);
-    --gold: #d8b45a;
-    --gold-bright: #f0d489;
-    --gold-dim: rgba(216, 180, 90, 0.55);
-    --text: #f2edde;
-    --muted: #a09eae;
-    --serif: "Didot", "Bodoni 72", "Playfair Display", "Times New Roman", serif;
-    --sans: -apple-system, BlinkMacSystemFont, "Avenir Next", "Segoe UI", Roboto, sans-serif;
+    --bg: #000000;
+    --bg-glow: #0a0a0a;
+    --panel: rgba(255, 255, 255, 0.02);
+    --panel-solid: #0a0a0a;
+    --line: rgba(255, 255, 255, 0.3);
+    --line-soft: rgba(255, 255, 255, 0.14);
+    --gold: #ffffff;
+    --gold-bright: #ffffff;
+    --gold-dim: rgba(255, 255, 255, 0.55);
+    --text: #f4f4f4;
+    --muted: #8f8f8f;
+    --serif: "Anton", "Arial Narrow", "Helvetica Neue", Impact, sans-serif;
+    --sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
     --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
     color-scheme: dark;
   }
@@ -29,8 +33,7 @@
 
   body {
     background:
-      radial-gradient(ellipse 120% 60% at 50% -10%, var(--bg-glow), transparent 60%),
-      radial-gradient(ellipse 80% 50% at 80% 110%, #171325, transparent 60%),
+      radial-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1.4px) 0 0 / 26px 26px,
       var(--bg);
     color: var(--text);
     font-family: var(--sans);
@@ -76,6 +79,44 @@
     margin: 0 auto;
     font-size: 1rem;
   }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .marquee {
+    overflow: hidden;
+    border-bottom: 1px solid var(--line-soft);
+    background: #000;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #fff;
+    padding: 11px 0;
+    white-space: nowrap;
+  }
+  .marquee-track { display: inline-block; white-space: nowrap; animation: marq 30s linear infinite; }
+  .marquee-track span { display: inline-block; padding-right: 2ch; }
+  @keyframes marq { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+  .wordmark {
+    width: min(600px, 88vw);
+    height: auto;
+    display: block;
+    margin: 0 auto 6px;
+    overflow: visible;
+  }
+  .wordmark text { font-family: var(--serif); fill: #fff; }
+  .wordmark .wm-line1 { font-size: 126px; letter-spacing: 4px; }
+  .wordmark .wm-line2 { font-size: 88px; letter-spacing: 6px; }
+  .wordmark .wm-star { fill: #fff; }
 
   /* ---------- Panels ---------- */
   .panel {
@@ -95,6 +136,11 @@
     display: flex;
     align-items: center;
     gap: 12px;
+  }
+  .panel-title::before {
+    content: "\2605";
+    font-size: 0.6rem;
+    color: var(--gold);
   }
   .panel-title::after {
     content: "";
@@ -212,7 +258,7 @@
   }
   .center-chip.on {
     border-color: var(--gold-dim);
-    background: rgba(216, 180, 90, 0.14);
+    background: rgba(255, 255, 255, 0.14);
     color: var(--gold-bright);
   }
   .hd-note { color: var(--muted); font-size: 0.82rem; margin: 14px 0 0; max-width: 62ch; }
@@ -251,17 +297,17 @@
     transition: background 0.2s, color 0.2s, border-color 0.2s;
     min-height: 48px;
   }
-  .btn:hover { background: rgba(216, 180, 90, 0.1); }
+  .btn:hover { background: rgba(255, 255, 255, 0.1); }
   .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   .btn-primary {
-    background: linear-gradient(180deg, #e3c26e, #c29a3f);
-    color: #17130a;
+    background: #ffffff;
+    color: #000;
     border: none;
     font-weight: 700;
     width: 100%;
     margin-top: 22px;
   }
-  .btn-primary:hover { background: linear-gradient(180deg, #f0d489, #d0a94e); }
+  .btn-primary:hover { background: #e6e6e6; }
   .error {
     color: #e8a1a1;
     font-size: 0.88rem;
@@ -280,7 +326,7 @@
     font-size: clamp(6rem, 26vw, 9.5rem);
     line-height: 0.9;
     color: var(--gold-bright);
-    text-shadow: 0 0 70px rgba(216, 180, 90, 0.35);
+    text-shadow: 0 0 70px rgba(255, 255, 255, 0.35);
     display: block;
   }
   .hero-num .big-label {
@@ -350,7 +396,7 @@
     font-size: 0.58rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: #17130a;
+    color: #000;
     background: var(--gold);
     border-radius: 2px;
     padding: 2px 6px;
@@ -390,7 +436,7 @@
   }
   .reading-list li:last-child { border-bottom: none; }
   .reading-list li::before {
-    content: "◆";
+    content: "★";
     position: absolute;
     left: 0;
     top: 12px;
@@ -466,8 +512,8 @@
     color: var(--gold-bright);
     white-space: nowrap;
   }
-  .h-verdict.aligned { background: linear-gradient(180deg, #e3c26e, #c29a3f); color: #17130a; border: none; }
-  .h-verdict.harmonious { background: rgba(216, 180, 90, 0.14); }
+  .h-verdict.aligned { background: #ffffff; color: #000; border: none; }
+  .h-verdict.harmonious { background: rgba(255, 255, 255, 0.14); }
   .harmony-text { color: var(--text); max-width: 62ch; margin: 0 0 12px; }
   .harmony-note { color: var(--muted); font-size: 0.85rem; margin: 0; max-width: 62ch; }
 
@@ -511,7 +557,7 @@
     margin: 0;
     padding: 20px 22px;
     border-left: 2px solid var(--gold);
-    background: rgba(216, 180, 90, 0.05);
+    background: rgba(255, 255, 255, 0.05);
     font-family: var(--serif);
     font-style: italic;
     font-size: 1.12rem;
@@ -520,7 +566,7 @@
   .karmic {
     border: 1px solid var(--line);
     border-radius: 4px;
-    background: rgba(216, 180, 90, 0.04);
+    background: rgba(255, 255, 255, 0.04);
     padding: 16px 18px;
     margin-top: 16px;
     font-size: 0.92rem;
@@ -548,7 +594,7 @@
     bottom: 28px;
     transform: translateX(-50%) translateY(80px);
     background: var(--gold);
-    color: #17130a;
+    color: #000;
     font-family: var(--mono);
     font-size: 0.78rem;
     letter-spacing: 0.08em;
@@ -611,6 +657,160 @@
   }
   .empty-note { color: var(--muted); font-size: 0.9rem; margin: 0; }
 
+  /* ---------- Career ---------- */
+  .field-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 18px; }
+
+  /* ---------- Compatibility ---------- */
+  .compat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 22px;
+  }
+  @media (max-width: 560px) { .compat-grid { grid-template-columns: 1fr; } }
+  .compat-person-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--gold-bright);
+    margin: 14px 0 0;
+  }
+  .compat-score { text-align: center; padding: 30px 8px 6px; }
+  .compat-score .cs-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 10px;
+  }
+  .compat-score .cs-num {
+    font-family: var(--serif);
+    font-size: clamp(4rem, 16vw, 5.6rem);
+    line-height: 1;
+    color: var(--gold-bright);
+    text-shadow: 0 0 60px rgba(255, 255, 255, 0.35);
+    font-variant-numeric: tabular-nums;
+  }
+  .compat-score .cs-verdict {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold-bright);
+    margin-top: 16px;
+  }
+  .compat-score .cs-names { color: var(--muted); font-size: 0.92rem; margin-top: 12px; }
+  .c-aspect { margin: 20px 0; }
+  .c-aspect-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .c-aspect-head .ca-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .c-aspect-head .ca-nums { color: var(--muted); font-family: var(--serif); font-size: 0.95rem; margin-left: 8px; letter-spacing: 0; text-transform: none; }
+  .c-aspect-head .ca-pct {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    color: var(--gold-bright);
+    font-variant-numeric: tabular-nums;
+  }
+  .c-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 8px 0 10px;
+  }
+  .c-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #9a9a9a, #ffffff);
+    border-radius: 999px;
+  }
+  .c-text { color: var(--text); font-size: 0.92rem; max-width: 62ch; margin: 0; }
+
+  /* ---------- Info popups ---------- */
+  .info-btn {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--gold-dim);
+    background: transparent;
+    color: var(--gold);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.8rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .info-btn:hover { background: rgba(255, 255, 255, 0.14); }
+  .info-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 5, 10, 0.72);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 100;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--panel-solid);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    max-width: 580px;
+    width: 100%;
+    max-height: 84vh;
+    overflow-y: auto;
+    padding: 26px 24px 24px;
+    position: relative;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .modal-overlay.show .modal { animation: rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  }
+  .modal-x {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 6px 10px;
+  }
+  .modal-x:hover { color: var(--gold-bright); }
+  .modal-x:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .modal p { color: var(--text); font-size: 0.92rem; margin: 0 0 12px; }
+  .modal p:last-child { margin-bottom: 0; }
+  .modal strong { color: var(--gold-bright); font-weight: 600; }
+  .modal ul { margin: 0 0 12px; padding-left: 20px; color: var(--text); font-size: 0.92rem; }
+  .modal li { margin: 6px 0; }
+  .modal .m-note { color: var(--muted); font-size: 0.82rem; }
+
   footer {
     text-align: center;
     color: var(--muted);
@@ -624,10 +824,28 @@
 
 </head>
 <body>
+<div class="marquee" aria-hidden="true"><div class="marquee-track">
+  <span>Welcome to ★ Soul Metadata ★ read the code behind the name ★ numerology · human design · compatibility · career ★ your whole pattern, decoded ★</span>
+  <span>Welcome to ★ Soul Metadata ★ read the code behind the name ★ numerology · human design · compatibility · career ★ your whole pattern, decoded ★</span>
+</div></div>
 <div class="wrap">
   <header>
-    <span class="eyebrow">Soul Metadata</span>
-    <h1>Read the code<br />behind <em>the name.</em></h1>
+    <h1 class="sr-only">Soul Metadata — read the code behind the name</h1>
+    <svg class="wordmark" viewBox="0 0 700 250" role="img" aria-label="Soul Metadata">
+      <defs>
+        <filter id="wm-warp" x="-15%" y="-15%" width="130%" height="130%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.012 0.055" numOctaves="2" seed="11" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="20" />
+        </filter>
+      </defs>
+      <g filter="url(#wm-warp)" transform="rotate(-5 350 125)">
+        <text x="350" y="120" text-anchor="middle" class="wm-line1">SOUL</text>
+        <text x="350" y="220" text-anchor="middle" class="wm-line2">METADATA</text>
+      </g>
+      <path class="wm-star" transform="translate(548 26) scale(1.2)" d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z" />
+      <path class="wm-star" transform="translate(92 192) scale(0.7)" d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z" />
+    </svg>
+    <span class="eyebrow">★ Read the code behind the name ★</span>
     <p>Enter a full birth name and date of birth to generate a symbolic numerology profile — six layers of Pythagorean metadata, decoded.</p>
   </header>
 
@@ -659,27 +877,32 @@
     <div class="hero-num reveal" id="hero"></div>
 
     <section class="panel">
-      <h2 class="panel-title">Core Numbers</h2>
+      <h2 class="panel-title">Core Numbers <button class="info-btn" type="button" data-info="core" aria-label="About Core Numbers">i</button></h2>
       <div class="num-grid" id="num-grid"></div>
     </section>
 
     <section class="panel">
-      <h2 class="panel-title" id="fn-title">Name Reading</h2>
+      <h2 class="panel-title"><span id="fn-title">Name Reading</span> <button class="info-btn" type="button" data-info="nameReading" aria-label="About the Name Reading">i</button></h2>
       <div id="fn-body"></div>
     </section>
 
     <section class="panel">
-      <h2 class="panel-title">Name · Birth Harmony</h2>
+      <h2 class="panel-title">Name · Birth Harmony <button class="info-btn" type="button" data-info="harmony" aria-label="About Name and Birth Harmony">i</button></h2>
       <div id="harmony-body"></div>
     </section>
 
     <section class="panel">
-      <h2 class="panel-title">Human Design Chart</h2>
+      <h2 class="panel-title">Human Design Chart <button class="info-btn" type="button" data-info="hd" aria-label="About the Human Design Chart">i</button></h2>
       <div id="hd-body"></div>
     </section>
 
     <section class="panel">
-      <h2 class="panel-title">Metadata Results</h2>
+      <h2 class="panel-title">Career Blueprint <button class="info-btn" type="button" data-info="career" aria-label="About the Career Blueprint">i</button></h2>
+      <div id="career-body"></div>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel-title">Metadata Results <button class="info-btn" type="button" data-info="table" aria-label="About the Metadata Results table">i</button></h2>
       <div class="table-scroll">
         <table>
           <thead>
@@ -691,13 +914,13 @@
     </section>
 
     <section class="panel deep">
-      <h2 class="panel-title">Deep Meaning</h2>
+      <h2 class="panel-title">Deep Meaning <button class="info-btn" type="button" data-info="deep" aria-label="About the Deep Meaning">i</button></h2>
       <div id="deep-text"></div>
       <div id="karmic-box"></div>
     </section>
 
     <section class="panel">
-      <h2 class="panel-title">Pattern Statement</h2>
+      <h2 class="panel-title">Pattern Statement <button class="info-btn" type="button" data-info="pattern" aria-label="About the Pattern Statement">i</button></h2>
       <blockquote id="pattern-text"></blockquote>
     </section>
 
@@ -717,6 +940,53 @@
     <div class="profiles" id="profiles-list"></div>
   </section>
 
+  <section class="panel" id="compat-panel">
+    <h2 class="panel-title">Compatibility <button class="info-btn" type="button" data-info="compat" aria-label="About the Compatibility reading">i</button></h2>
+    <p class="harmony-note" style="margin:0">Enter two people to read how their core numbers interact — love, friendship, or business. If you've already decoded a profile above, Person One fills in automatically.</p>
+    <div class="compat-grid">
+      <div>
+        <p class="compat-person-title">Person One</p>
+        <label for="c1-name">Full birth name</label>
+        <input type="text" id="c1-name" placeholder="First person's full name" enterkeyhint="next" />
+        <label for="c1-m">Date of birth</label>
+        <div class="date-row">
+          <input type="text" id="c1-m" inputmode="numeric" maxlength="2" placeholder="MM" aria-label="Person one birth month" />
+          <input type="text" id="c1-d" inputmode="numeric" maxlength="2" placeholder="DD" aria-label="Person one birth day" />
+          <input type="text" id="c1-y" inputmode="numeric" maxlength="4" placeholder="YYYY" aria-label="Person one birth year" />
+        </div>
+        <label for="c1-h">Birth time — optional</label>
+        <div class="time-row">
+          <input type="text" id="c1-h" inputmode="numeric" maxlength="2" placeholder="HH" aria-label="Person one birth hour" />
+          <input type="text" id="c1-min" inputmode="numeric" maxlength="2" placeholder="MM" aria-label="Person one birth minute" />
+          <select id="c1-ap" aria-label="Person one AM or PM"><option>AM</option><option>PM</option></select>
+          <select id="c1-tz" aria-label="Person one time zone at birth"></select>
+        </div>
+      </div>
+      <div>
+        <p class="compat-person-title">Person Two</p>
+        <label for="c2-name">Full birth name</label>
+        <input type="text" id="c2-name" placeholder="Second person's full name" enterkeyhint="next" />
+        <label for="c2-m">Date of birth</label>
+        <div class="date-row">
+          <input type="text" id="c2-m" inputmode="numeric" maxlength="2" placeholder="MM" aria-label="Person two birth month" />
+          <input type="text" id="c2-d" inputmode="numeric" maxlength="2" placeholder="DD" aria-label="Person two birth day" />
+          <input type="text" id="c2-y" inputmode="numeric" maxlength="4" placeholder="YYYY" aria-label="Person two birth year" enterkeyhint="go" />
+        </div>
+        <label for="c2-h">Birth time — optional</label>
+        <div class="time-row">
+          <input type="text" id="c2-h" inputmode="numeric" maxlength="2" placeholder="HH" aria-label="Person two birth hour" />
+          <input type="text" id="c2-min" inputmode="numeric" maxlength="2" placeholder="MM" aria-label="Person two birth minute" />
+          <select id="c2-ap" aria-label="Person two AM or PM"><option>AM</option><option>PM</option></select>
+          <select id="c2-tz" aria-label="Person two time zone at birth"></select>
+        </div>
+      </div>
+    </div>
+    <p class="harmony-note" style="margin:14px 0 0">Add both birth times to include the Human Design pairing — how the two energy types and bodygraphs interact.</p>
+    <button class="btn btn-primary" id="compat-btn" type="button">Read the Connection</button>
+    <p class="error" id="compat-error"></p>
+    <div id="compat-body" style="display:none"></div>
+  </section>
+
   <footer>
     <span class="eyebrow">Soul Metadata</span>
     This is a symbolic, numerological interpretation for reflection and entertainment — not scientific, legal, medical, financial, or psychological advice.
@@ -725,6 +995,14 @@
       <button class="btn" type="button" id="share-app-btn">Share this app</button>
     </p>
   </footer>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal-x" id="modal-x" type="button" aria-label="Close">&times;</button>
+    <h3 class="panel-title" id="modal-title"></h3>
+    <div id="modal-body"></div>
+  </div>
 </div>
 
 <div class="toast" id="toast" role="status"></div>
@@ -1699,6 +1977,366 @@
     return notes;
   }
 
+  /* ============ Career blueprint ============ */
+
+  // Fields keyed by Expression — where the name's talents earn best.
+  var CAREER_FIELDS = {
+    1:  ["Founder / entrepreneur", "Executive leadership", "Sales & business development", "Solo practice / freelance", "Product pioneer"],
+    2:  ["Counseling & therapy", "Mediation & diplomacy", "Partnerships & HR", "Music & fine arts", "Operations & trusted support"],
+    3:  ["Writing & journalism", "Performance & entertainment", "Marketing & branding", "Design & visual arts", "Teaching & speaking"],
+    4:  ["Engineering", "Project & operations management", "Finance & accounting", "Construction & skilled trades", "Systems & logistics"],
+    5:  ["Media & communications", "Travel & hospitality", "Promotion & advertising", "Event production", "Emerging tech & startups"],
+    6:  ["Healthcare & healing arts", "Teaching & childcare", "Hospitality & service leadership", "Interior & experience design", "Community & family business"],
+    7:  ["Research & science", "Data & analysis", "Strategy & consulting", "Spiritual & philosophical teaching", "Specialist technical fields"],
+    8:  ["Business ownership", "Finance & investment", "Real estate & development", "Law & negotiation", "Executive management"],
+    9:  ["Arts & film", "Non-profit & advocacy", "Medicine & healing", "International work", "Teaching & mentorship"],
+    11: ["Inspirational media", "Coaching & counseling", "Innovation & invention", "Public speaking", "Art with a message"],
+    22: ["Large-scale enterprise", "Architecture & planning", "Institution & platform building", "Civic leadership", "Engineering at scale"],
+    33: ["Teaching & mentorship", "Healing professions", "Ministry & guidance", "Community leadership", "Creative direction that uplifts"]
+  };
+
+  // Career arc keyed by Life Path — the shape the working life keeps taking.
+  var CAREER_ARC = {
+    1:  "The career arc bends toward ownership: every role is training for the day this profile runs its own operation. Promotions matter less than autonomy — the fastest growth happens where decisions aren't second-guessed.",
+    2:  "The career arc bends toward the trusted-partner seat: the advisor, producer, or right hand whose influence is quiet but decisive. Power here is relational — built one alliance at a time.",
+    3:  "The career arc bends toward an audience: work keeps migrating toward writing, speaking, designing, performing — anywhere the voice reaches people. Visibility isn't vanity in this chart; it's the job.",
+    4:  "The career arc bends toward mastery of systems: the person who turns chaos into process and gets handed bigger messes each time. Seniority compounds here — this design gets more valuable every year.",
+    5:  "The career arc bends toward variety: multiple chapters, industries, even reinventions. The résumé looks restless until midlife, when the range itself becomes the credential.",
+    6:  "The career arc bends toward responsibility for people: teams, clients, patients, students. Advancement arrives by being the one everyone trusts with what matters most.",
+    7:  "The career arc bends toward expertise: the specialist, analyst, or authority whose depth can't be faked. The best career moves are the ones that buy uninterrupted focus.",
+    8:  "The career arc bends toward the top of the org chart — or ownership of it. This design is built to handle money, pressure, and scale; small stakes actively shrink it.",
+    9:  "The career arc bends toward mission: work keeps gravitating to causes, creativity, and impact beyond a paycheck. The most lucrative move is often the most meaningful one.",
+    11: "The career arc bends toward the message: whatever the industry, this profile ends up inspiring, translating vision, and lighting rooms up. The work matures when the vision gets a container.",
+    22: "The career arc bends toward the big build: institutions, platforms, bodies of work designed to outlast their maker. Think in decades — this chart already does.",
+    33: "The career arc bends toward lifting others: the teacher, healer, or mentor whose success is measured in people grown. Influence compounds through every life touched."
+  };
+
+  // What makes work sustainable, keyed by Soul Urge.
+  var CAREER_FUEL = {
+    1:  "Work only stays sustainable with real autonomy — a lane that is unmistakably yours.",
+    2:  "Work only stays sustainable inside genuine collaboration — being valued by people you trust.",
+    3:  "Work only stays sustainable with a creative outlet — somewhere the voice actually gets heard.",
+    4:  "Work only stays sustainable with stability and visible progress — clear ground rules, compounding results.",
+    5:  "Work only stays sustainable with variety — new problems, new rooms, room to move.",
+    6:  "Work only stays sustainable when you can see people helped — service with visible effect.",
+    7:  "Work only stays sustainable with depth — time to master, space to think.",
+    8:  "Work only stays sustainable with rising stakes — measurable wins and growing authority.",
+    9:  "Work only stays sustainable when it serves something larger than the paycheck.",
+    11: "Work only stays sustainable when it inspires — you and everyone downstream of you.",
+    22: "Work only stays sustainable when the project is big enough to still matter in twenty years.",
+    33: "Work only stays sustainable when someone is visibly growing because of it."
+  };
+
+  // Professional edge, keyed by Birth Day.
+  var CAREER_EDGE = {
+    1:  "starting things — first moves, cold opens, launches",
+    2:  "timing and reading the room in negotiations",
+    3:  "wordcraft — the pitch, the caption, the room-warming line",
+    4:  "follow-through — the plan that actually ships",
+    5:  "improvisation when plans meet reality",
+    6:  "hosting — making clients and teams feel held",
+    7:  "spotting the detail everyone else missed",
+    8:  "negotiation — knowing what things are worth",
+    9:  "perspective — reframing crises into plans",
+    11: "an uncanny first read on people and ideas",
+    22: "scaling — instinctively seeing the bigger version",
+    33: "mentorship — people do their best work near you"
+  };
+
+  function careerHTML(p) {
+    var ex = p.expression, lp = p.lifePath, su = p.soulUrge, bd = p.birthDay;
+    var html = "";
+
+    html += '<div class="ruling"><span class="r-num">' + esc(ex.display) + "</span>" +
+      '<span class="r-title">' + esc(CORE[ex.final].title) + " toolkit</span></div>";
+
+    html += '<p class="harmony-text">The <strong style="color:var(--gold-bright)">' + esc(ex.display) +
+      " Expression</strong> points to the fields where this name's talents convert most naturally into a living:</p>";
+
+    html += '<div class="field-chips">' + CAREER_FIELDS[ex.final].map(function (f) {
+      return '<span class="center-chip on">' + esc(f) + "</span>";
+    }).join("") + "</div>";
+
+    html += '<div class="hd-cards">' +
+      '<div class="hd-card"><div class="hd-label">The Arc — Life Path ' + esc(lp.display) + "</div>" +
+        esc(CAREER_ARC[lp.final]) + "</div>" +
+      '<div class="hd-card"><div class="hd-label">The Fuel — Soul Urge ' + esc(su.display) + "</div>" +
+        esc(CAREER_FUEL[su.final]) + "</div>" +
+      '<div class="hd-card"><div class="hd-label">The Edge — Birth Day ' + esc(bd.display) + "</div>" +
+        "The workplace superpower: " + esc(CAREER_EDGE[bd.final]) + ".</div>" +
+      "</div>";
+
+    html += '<p class="harmony-note">Fields come from the Expression (the full name’s talents), the arc from the Life Path, the fuel from the Soul Urge, and the edge from the Birth Day. Symbolic guidance — pair it with real-world skills and interests.</p>';
+    return html;
+  }
+
+  /* ============ Compatibility engine ============ */
+
+  // Symmetric affinity ratings (1–5) between reduced numbers 1–9.
+  var AFFINITY = {
+    1: { 1: 3, 2: 3, 3: 5, 4: 2, 5: 5, 6: 3, 7: 4, 8: 3, 9: 4 },
+    2: { 2: 4, 3: 3, 4: 5, 5: 2, 6: 5, 7: 3, 8: 5, 9: 4 },
+    3: { 3: 4, 4: 2, 5: 5, 6: 4, 7: 3, 8: 2, 9: 5 },
+    4: { 4: 4, 5: 2, 6: 4, 7: 5, 8: 5, 9: 2 },
+    5: { 5: 4, 6: 2, 7: 5, 8: 3, 9: 4 },
+    6: { 6: 5, 7: 2, 8: 4, 9: 5 },
+    7: { 7: 5, 8: 2, 9: 3 },
+    8: { 8: 3, 9: 3 },
+    9: { 9: 4 }
+  };
+
+  var RATING_PCT = { 1: 44, 2: 57, 3: 70, 4: 84, 5: 96 };
+
+  function reduceToDigit(n) {
+    while (n > 9) n = digitSum(n);
+    return n;
+  }
+
+  function pairRating(a, b) {
+    var x = reduceToDigit(a), y = reduceToDigit(b);
+    var lo = Math.min(x, y), hi = Math.max(x, y);
+    return AFFINITY[lo][hi];
+  }
+
+  var COMPAT_ASPECTS = [
+    { key: "lifePath",    label: "Life Direction",   weight: 0.40 },
+    { key: "soulUrge",    label: "Heart Connection", weight: 0.25 },
+    { key: "expression",  label: "Talent Blend",     weight: 0.20 },
+    { key: "personality", label: "Day-to-Day Vibe",  weight: 0.15 }
+  ];
+
+  // {A} and {B} are replaced with the two ROLES phrases.
+  var COMPAT_TEXT = {
+    lifePath: {
+      5: "These two roads run the same direction at the same speed — {A} and {B} recognize each other on sight. Plans, ambitions, and instincts about the future tend to line up without negotiation.",
+      4: "The life directions support each other naturally: {A} opens doors that {B} is glad to walk through. Long-term visions differ in style, not substance.",
+      3: "Two parallel roads — close enough to travel together, distinct enough that each keeps their own map. The partnership works when neither insists the other's route is wrong.",
+      2: "The paths pull at different speeds: {A} on one clock, {B} on another. This pairing needs regular, explicit conversations about the future so nobody quietly drifts.",
+      1: "These directions genuinely diverge — {A} and {B} are being built by life for different assignments. It can absolutely work, but the relationship must be chosen daily, not assumed."
+    },
+    soulUrge: {
+      5: "The hearts want the same thing underneath it all. Private motivations rarely need explaining — one look and both feel understood.",
+      4: "What each heart wants feeds the other's want: one's satisfaction creates the conditions for the other's. Emotional generosity comes easily here.",
+      3: "The hearts run on different fuel, but neither starves the other. Understanding takes a real conversation instead of a glance — worth having often.",
+      2: "The private wants tug in different directions: what recharges one can drain the other. Naming needs out loud, early, keeps this from becoming silent scorekeeping.",
+      1: "The deep wants are near-opposites, which makes this bond a masterclass in empathy. Handled consciously it's transformative; on autopilot it frays."
+    },
+    expression: {
+      5: "The talent sets interlock like gears — {A} plus {B} covers more ground than either alone. A natural team for projects, business, or building a life.",
+      4: "The gifts complement more than they overlap: each is strong precisely where the other is casual. Divide the labor along those lines and things get done fast.",
+      3: "The toolkits overlap in places and diverge in others — collaboration works with clear roles. Without them, both may reach for the same wheel.",
+      2: "The working styles genuinely differ: pace, standards, and method won't sync on their own. Agreements beat assumptions in every shared project.",
+      1: "Two very different operating systems. As collaborators it demands patience; as partners it demands respect for methods that will never look like your own."
+    },
+    personality: {
+      5: "Up close, the daily energies match — the same humor, the same rhythm, the same read on a room. Being together feels low-effort from day one.",
+      4: "First impressions landed true and still hold: each finds the other easy company. The surface chemistry gives the deeper layers room to grow.",
+      3: "The outer styles differ enough to keep things interesting — {A} meets {B} and both stay a little curious. Friction, when it comes, is mostly stylistic.",
+      2: "The day-to-day rhythms clash at times: one person's normal reads as too much (or too little) to the other. Most flare-ups here are style, not substance — name them that way.",
+      1: "Very different daily wavelengths — how each moves through an ordinary Tuesday barely resembles the other. Shared rituals become the bridge."
+    }
+  };
+
+  var COMPAT_ADVICE = {
+    lifePath: "The growth work lives in the long view: put shared plans on the calendar and revisit them — where this is going shouldn't be a guess.",
+    soulUrge: "The growth work is emotional translation: say the want beneath the want. Neither heart should have to be decoded from clues.",
+    expression: "The growth work is in how you build together: define who owns what, then let each work their own way inside it.",
+    personality: "The growth work is daily rhythm: build small shared rituals so two different wavelengths get a common beat."
+  };
+
+  var COMPAT_VERDICTS = [
+    { min: 90, label: "Soul-Deep Match",
+      text: "A rare level of numerical agreement — the currents in both charts reinforce each other almost everywhere. The risk isn't conflict; it's complacency. Keep choosing it on purpose." },
+    { min: 78, label: "Natural Harmony",
+      text: "The charts move in the same key with enough contrast to stay interesting. Most friction resolves on its own, and the connection compounds with time." },
+    { min: 64, label: "Workable Chemistry",
+      text: "Real affinity with real differences. This is the classic strong pairing: the numbers supply the spark, and communication supplies the staying power." },
+    { min: 50, label: "Growth Pairing",
+      text: "The charts differ more than they match — which is exactly what makes this bond catalytic. Each becomes more complete by learning the other's current." },
+    { min: 0, label: "Refining Fire",
+      text: "Nearly opposite designs. Chosen consciously, this is the pairing people write books about; on autopilot, it burns hot and fast. Intention is everything." }
+  ];
+
+  function computeCompatibility(p1, p2) {
+    var aspects = COMPAT_ASPECTS.map(function (a) {
+      var x = p1[a.key].final, y = p2[a.key].final;
+      var rating = pairRating(x, y);
+      var pct = RATING_PCT[rating];
+      if (x === y) pct = Math.max(pct, 88); // identical numbers resonate even when the matrix is lukewarm
+      var text = COMPAT_TEXT[a.key][rating]
+        .replace("{A}", ROLES[x])
+        .replace("{B}", ROLES[y]);
+      return { key: a.key, label: a.label, weight: a.weight, a: x, b: y,
+               aDisplay: p1[a.key].display, bDisplay: p2[a.key].display,
+               rating: rating, pct: pct, text: text };
+    });
+
+    var overall = Math.round(aspects.reduce(function (s, a) { return s + a.pct * a.weight; }, 0));
+    var verdict = COMPAT_VERDICTS.filter(function (v) { return overall >= v.min; })[0];
+
+    var weakest = aspects.reduce(function (w, a) { return a.pct < w.pct ? a : w; }, aspects[0]);
+    var shared = aspects.filter(function (a) { return a.a === a.b; });
+
+    var masters = [];
+    [[p1, "one"], [p2, "two"]].forEach(function (pair) {
+      COMPAT_ASPECTS.forEach(function (a) {
+        if (pair[0][a.key].isMaster) masters.push("Person " + pair[1] + " carries master " + pair[0][a.key].final + " in " + a.label);
+      });
+    });
+
+    return { p1: p1, p2: p2, overall: overall, verdict: verdict,
+             aspects: aspects, weakest: weakest, shared: shared, masters: masters };
+  }
+
+  function compatHTML(c) {
+    var html = "";
+
+    html += '<div class="compat-score reveal">' +
+      '<span class="cs-label">Connection Index</span>' +
+      '<div class="cs-num">' + c.overall + '%</div>' +
+      '<div><span class="cs-verdict">' + esc(c.verdict.label) + "</span></div>" +
+      '<p class="cs-names">' + esc(c.p1.name) + " · Life Path " + esc(c.p1.lifePath.display) +
+      " &nbsp;+&nbsp; " + esc(c.p2.name) + " · Life Path " + esc(c.p2.lifePath.display) + "</p></div>";
+
+    html += '<p class="harmony-text" style="margin-top:16px">' + esc(c.verdict.text) +
+      " This pairing joins " + esc(ROLES[c.p1.lifePath.final]) + " with " + esc(ROLES[c.p2.lifePath.final]) + ".</p>";
+
+    html += c.aspects.map(function (a) {
+      return '<div class="c-aspect">' +
+        '<div class="c-aspect-head"><span class="ca-label">' + esc(a.label) +
+        '<span class="ca-nums">' + esc(a.aDisplay) + " · " + esc(a.bDisplay) + "</span></span>" +
+        '<span class="ca-pct">' + a.pct + "%</span></div>" +
+        '<div class="c-bar"><div class="c-fill" style="width:' + a.pct + '%"></div></div>' +
+        '<p class="c-text">' + esc(a.text) + "</p></div>";
+    }).join("");
+
+    if (c.shared.length) {
+      html += '<div class="karmic"><div class="karmic-title">Mirror Numbers</div><p>Identical ' +
+        esc(c.shared.map(function (a) { return a.label + " (" + a.a + ")"; }).join(", ")) +
+        " — the places these two are the same person. Instant understanding there, but also shared blind spots: no one is holding the other side of that particular coin.</p></div>";
+    }
+
+    if (c.masters.length) {
+      html += '<div class="karmic"><div class="karmic-title">Master Number Voltage</div><p>' +
+        esc(c.masters.join("; ")) + ". Master numbers add intensity to a bond — more inspiration, more pressure, more to grow into together.</p></div>";
+    }
+
+    html += '<p class="harmony-text" style="margin-top:18px"><strong style="color:var(--gold-bright)">Where the work is:</strong> ' +
+      esc(COMPAT_ADVICE[c.weakest.key]) + "</p>";
+
+    if (c.hdPair) {
+      html += hdPairHTML(c.hdPair, c.p1.name, c.p2.name);
+    } else {
+      html += '<p class="harmony-note" style="margin-top:16px">Add both birth times above and read again to include the Human Design pairing — types, strategies, and the connection channels the two bodygraphs form together.</p>';
+    }
+
+    html += '<p class="harmony-note">Weighted blend: Life Direction 40% · Heart Connection 25% · Talent Blend 20% · Day-to-Day Vibe 15%. Symbolic reading for reflection and fun — real compatibility is built, not calculated.</p>';
+
+    html += '<div class="actions" style="margin-top:18px">' +
+      '<button class="btn" type="button" id="compat-share-btn">Text the Card</button>' +
+      '<button class="btn" type="button" id="compat-download-btn">Download Card</button></div>';
+    return html;
+  }
+
+  /* ============ Human Design pairing ============ */
+
+  var HD_TYPE_ORDER = ["Manifestor", "Generator", "Manifesting Generator", "Projector", "Reflector"];
+
+  // Keyed by the two types in HD_TYPE_ORDER order, joined with "|".
+  var HD_TYPE_PAIRS = {
+    "Manifestor|Manifestor": "Two initiators — a relationship of parallel launches. It thrives when both inform each other before acting; two urges to move without warning is where sparks turn to burns.",
+    "Manifestor|Generator": "The initiator and the life force: one starts, the other builds it out with sustainable energy. It works beautifully when the Manifestor informs and the Generator gets real things to respond to rather than orders.",
+    "Manifestor|Manifesting Generator": "Two fast movers — the Manifestor opens the track and the MG sprints down it, often overtaking. Informing each other keeps all that speed from becoming collision.",
+    "Manifestor|Projector": "The initiator and the guide: the Projector sees exactly how the Manifestor's impact could land better — but the insight only lands when invited. Impact plus vision, when the timing is honored.",
+    "Manifestor|Reflector": "The initiator and the mirror: the Reflector shows the Manifestor the true effect of their impact like no one else can. Patience with the Reflector's lunar pace is the price of that clarity.",
+    "Generator|Generator": "Two life forces — steady, warm, and built for shared work. The bond stays alive by asking each other real yes/no questions and never making the other push through a gut 'no'.",
+    "Generator|Manifesting Generator": "Both run on Sacral power, so energy is rarely the issue — pace is. The MG skips steps the Generator wants to savor; naming that difference turns friction into range.",
+    "Generator|Projector": "The classic pairing: the Generator supplies the energy, the Projector sees how to aim it. It works when the Generator invites the guidance and the Projector waits to be asked.",
+    "Generator|Reflector": "The life force and the mirror: the Reflector can taste whether the Generator's energy is healthy before the Generator feels it. Give big decisions a lunar month and this pairing rarely missteps.",
+    "Manifesting Generator|Manifesting Generator": "Two multi-track builders — a whirlwind of parallel projects. The bond thrives when both accept that dropped projects and changed lanes are design, not flakiness.",
+    "Manifesting Generator|Projector": "Energy meets insight at speed: the Projector can see which of the MG's many tracks is the live one. Invitation is everything — uninvited steering reads as brakes.",
+    "Manifesting Generator|Reflector": "The many-track builder and the mirror: the Reflector samples the MG's whirlwind and reflects it back honestly. Slow moon, fast engine — this works on the Reflector's timeline, not the MG's.",
+    "Projector|Projector": "Two guides with no motor between them — rich in recognition, insight, and conversation. The pairing must guard its rest fiercely and resist the urge to manage each other.",
+    "Projector|Reflector": "Two non-energy beings — deeply perceptive company. Together they read rooms, people, and systems like open books; together they also need serious rest and carefully chosen environments.",
+    "Reflector|Reflector": "Two mirrors — the rarest pairing there is. Each reflects their environment more than a fixed self, so where this pair lives and who surrounds them matters more than anything either of them 'is'."
+  };
+
+  function typePairKey(t1, t2) {
+    return HD_TYPE_ORDER.indexOf(t1) <= HD_TYPE_ORDER.indexOf(t2) ? t1 + "|" + t2 : t2 + "|" + t1;
+  }
+
+  function gateSetOf(hd) {
+    var s = {};
+    HD_BODIES.forEach(function (b) {
+      s[hd.personality[b].gate] = true;
+      s[hd.design[b].gate] = true;
+    });
+    return s;
+  }
+
+  // Classify every channel the two charts form together:
+  //   electromagnetic — each supplies a missing half (classic chemistry)
+  //   companionship  — both carry the whole channel (easy familiarity)
+  //   dominance      — one carries it whole, the other has neither gate
+  //   compromise     — one carries it whole, the other only half-plugs in
+  function computeHDPairing(hd1, hd2) {
+    var A = gateSetOf(hd1), B = gateSetOf(hd2);
+    var groups = { electromagnetic: [], companionship: [], dominance: [], compromise: [] };
+    HD_CHANNELS.forEach(function (ch) {
+      var fullA = A[ch[0]] && A[ch[1]], fullB = B[ch[0]] && B[ch[1]];
+      if (fullA && fullB) groups.companionship.push(ch);
+      else if (fullA || fullB) {
+        var other = fullA ? B : A;
+        (other[ch[0]] || other[ch[1]] ? groups.compromise : groups.dominance).push(ch);
+      } else if ((A[ch[0]] || B[ch[0]]) && (A[ch[1]] || B[ch[1]])) {
+        groups.electromagnetic.push(ch);
+      }
+    });
+    return {
+      type1: hd1.type, type2: hd2.type,
+      text: HD_TYPE_PAIRS[typePairKey(hd1.type, hd2.type)],
+      groups: groups
+    };
+  }
+
+  var HD_GROUP_META = {
+    electromagnetic: ["Electromagnetic", "each of you supplies the half the other is missing — the built-in attraction circuits of this pairing"],
+    companionship:   ["Companionship", "channels you both carry whole — easy, familiar, nothing to negotiate"],
+    dominance:       ["Dominance", "one carries the whole channel, the other none of it — teacher-and-student energy; conditioning flows one way"],
+    compromise:      ["Compromise", "one runs the whole channel while the other half-plugs in — mild friction over who drives it"]
+  };
+
+  function hdPairHTML(hp, name1, name2) {
+    var html = "";
+    html += '<div class="hd-label" style="font-family:var(--mono);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin:26px 0 10px">Energy Mechanics — Human Design</div>';
+    html += '<div class="hd-type"><span class="ht-name" style="font-size:1.6rem">' + esc(hp.type1) + " + " + esc(hp.type2) + "</span></div>";
+    html += '<p class="hd-lede" style="margin-bottom:14px">' + esc(hp.text) + "</p>";
+    html += '<p class="c-text" style="margin-bottom:6px">' + esc(firstName(name1)) + " keeps their <strong style=\"color:var(--gold-bright)\">" +
+      esc(HD_TYPES[hp.type1].strategy) + "</strong> strategy inside the relationship; " + esc(firstName(name2)) +
+      " keeps <strong style=\"color:var(--gold-bright)\">" + esc(HD_TYPES[hp.type2].strategy) + "</strong>.</p>";
+
+    Object.keys(HD_GROUP_META).forEach(function (k) {
+      var chs = hp.groups[k];
+      if (!chs.length) return;
+      var meta = HD_GROUP_META[k];
+      html += '<div class="hd-label" style="font-family:var(--mono);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px">' +
+        esc(meta[0]) + " · " + chs.length + "</div>";
+      html += '<div class="centers-grid">' + chs.map(function (ch) {
+        return '<span class="center-chip on">' + ch[0] + "–" + ch[1] + " · " +
+          esc(GATE_CENTER[ch[0]]) + "↔" + esc(GATE_CENTER[ch[1]]) + "</span>";
+      }).join("") + "</div>";
+      html += '<p class="harmony-note" style="margin:6px 0 0">' + esc(meta[1]) + ".</p>";
+    });
+
+    if (!hp.groups.electromagnetic.length && !hp.groups.companionship.length &&
+        !hp.groups.dominance.length && !hp.groups.compromise.length) {
+      html += '<p class="harmony-note">No connection channels form between these two bodygraphs — the bond runs on the numbers and on choice more than on hardwired electromagnetics.</p>';
+    }
+
+    html += '<p class="hd-note">Connection channels are counted across both charts (Personality + Design gates of each person). Inspired by Human Design partnership analysis — interpretations are original.</p>';
+    return html;
+  }
+
   /* ============ Profile computation ============ */
 
   function computeProfile(name, dobISO, calledName) {
@@ -1758,6 +2396,7 @@
     document.getElementById("hd-body").innerHTML = p.hd
       ? hdHTML(p.hd, p.hdTimeKnown)
       : '<p class="harmony-note">Add a birth time above (or check “I don’t know my birth time”) and decode again to see the Human Design chart.</p>';
+    document.getElementById("career-body").innerHTML = careerHTML(p);
 
     var grid = document.getElementById("num-grid");
     grid.innerHTML = LAYER_DEFS.map(function (d) {
@@ -1825,6 +2464,12 @@
       lines.push("   " + LAYER_MEANINGS[d[0]][r.final]);
     });
     lines.push("");
+    lines.push("CAREER BLUEPRINT (Expression " + p.expression.display + " — " + CORE[p.expression.final].title + ")");
+    lines.push("   Fields: " + CAREER_FIELDS[p.expression.final].join(", "));
+    lines.push("   " + CAREER_ARC[p.lifePath.final]);
+    lines.push("   Fuel: " + CAREER_FUEL[p.soulUrge.final]);
+    lines.push("   Edge: " + CAREER_EDGE[p.birthDay.final]);
+    lines.push("");
     lines.push("PATTERN: " + patternStatement(p));
     var notes = karmicNotes(p);
     if (notes.length) {
@@ -1850,6 +2495,15 @@
 
   /* ============ Share card (canvas) ============ */
 
+  function cardDots(ctx, W, H) {
+    ctx.fillStyle = "rgba(255,255,255,0.10)";
+    for (var y = 64; y < H - 56; y += 26) {
+      for (var x = 64; x < W - 56; x += 26) {
+        ctx.fillRect(x, y, 2, 2);
+      }
+    }
+  }
+
   function drawCard(p) {
     var W = 1080, H = 1350;
     var cv = document.createElement("canvas");
@@ -1857,52 +2511,53 @@
     var ctx = cv.getContext("2d");
 
     var g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#1c1a2b");
-    g.addColorStop(0.4, "#0b0b11");
-    g.addColorStop(1, "#0e0c16");
+    g.addColorStop(0, "#0a0a0a");
+    g.addColorStop(0.4, "#000000");
+    g.addColorStop(1, "#000000");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
 
-    ctx.strokeStyle = "rgba(216,180,90,0.5)";
+    ctx.strokeStyle = "rgba(255,255,255,0.5)";
     ctx.lineWidth = 2;
     ctx.strokeRect(40, 40, W - 80, H - 80);
-    ctx.strokeStyle = "rgba(216,180,90,0.18)";
+    ctx.strokeStyle = "rgba(255,255,255,0.18)";
     ctx.strokeRect(52, 52, W - 104, H - 104);
+    cardDots(ctx, W, H);
 
-    var serif = '"Didot","Bodoni 72",Georgia,serif';
+    var serif = '"Anton","Arial Narrow",Impact,sans-serif';
     var mono = '"SF Mono",Menlo,monospace';
 
     ctx.textAlign = "center";
-    ctx.fillStyle = "#d8b45a";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "600 30px " + mono;
     ctx.fillText("S O U L   M E T A D A T A", W / 2, 140);
 
-    ctx.fillStyle = "#f2edde";
+    ctx.fillStyle = "#ffffff";
     var nm = p.name.toUpperCase();
     var nmSize = nm.length > 22 ? 44 : 56;
     ctx.font = "400 " + nmSize + "px " + serif;
     ctx.fillText(nm, W / 2, 225);
 
-    ctx.fillStyle = "#a09eae";
+    ctx.fillStyle = "#9a9a9a";
     ctx.font = "26px " + mono;
     ctx.fillText(p.dobPretty, W / 2, 272);
 
     // Glow behind big number
     var glow = ctx.createRadialGradient(W / 2, 520, 30, W / 2, 520, 320);
-    glow.addColorStop(0, "rgba(216,180,90,0.28)");
-    glow.addColorStop(1, "rgba(216,180,90,0)");
+    glow.addColorStop(0, "rgba(255,255,255,0.28)");
+    glow.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = glow;
     ctx.fillRect(0, 220, W, 640);
 
-    ctx.fillStyle = "#a09eae";
+    ctx.fillStyle = "#9a9a9a";
     ctx.font = "24px " + mono;
     ctx.fillText("L I F E   P A T H", W / 2, 390);
 
-    ctx.fillStyle = "#f0d489";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "400 300px " + serif;
     ctx.fillText(String(p.lifePath.final), W / 2, 645);
 
-    ctx.fillStyle = "#f2edde";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "italic 52px " + serif;
     ctx.fillText(CORE[p.lifePath.final].title, W / 2, 730);
 
@@ -1912,21 +2567,21 @@
       var r = p[d[0]];
       var cx = 80 + cw * (i % cols) + cw / 2;
       var cy = 850 + Math.floor(i / cols) * 170;
-      ctx.fillStyle = "#a09eae";
+      ctx.fillStyle = "#9a9a9a";
       ctx.font = "20px " + mono;
       ctx.fillText(d[1].toUpperCase(), cx, cy);
-      ctx.fillStyle = "#f0d489";
+      ctx.fillStyle = "#ffffff";
       ctx.font = "400 64px " + serif;
       ctx.fillText(r.display, cx, cy + 70);
     });
 
     // Pattern line (wrapped)
-    ctx.fillStyle = "#c9c4b2";
+    ctx.fillStyle = "#cfcfcf";
     ctx.font = "italic 30px " + serif;
     var lesson = "The lesson: " + LESSONS[p.lifePath.final] + ".";
     wrapText(ctx, lesson, W / 2, 1205, W - 220, 40);
 
-    ctx.fillStyle = "rgba(160,158,174,0.7)";
+    ctx.fillStyle = "rgba(154,154,154,0.8)";
     ctx.font = "18px " + mono;
     ctx.fillText("Symbolic numerology — for reflection & fun", W / 2, 1290);
 
@@ -1957,6 +2612,119 @@
 
   function cardFileName(p) {
     return "soul-metadata-" + p.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".png";
+  }
+
+  /* ---- Compatibility card ---- */
+
+  function drawCompatCard(c) {
+    var W = 1080, H = 1350;
+    var cv = document.createElement("canvas");
+    cv.width = W; cv.height = H;
+    var ctx = cv.getContext("2d");
+
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, "#0a0a0a");
+    g.addColorStop(0.4, "#000000");
+    g.addColorStop(1, "#000000");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = "rgba(255,255,255,0.5)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(40, 40, W - 80, H - 80);
+    ctx.strokeStyle = "rgba(255,255,255,0.18)";
+    ctx.strokeRect(52, 52, W - 104, H - 104);
+    cardDots(ctx, W, H);
+
+    var serif = '"Anton","Arial Narrow",Impact,sans-serif';
+    var mono = '"SF Mono",Menlo,monospace';
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "600 28px " + mono;
+    ctx.fillText("S O U L   M E T A D A T A", W / 2, 130);
+    ctx.fillStyle = "#9a9a9a";
+    ctx.font = "600 22px " + mono;
+    ctx.fillText("C O M P A T I B I L I T Y", W / 2, 170);
+
+    function fitName(nm) { return nm.length > 24 ? 38 : 48; }
+    ctx.fillStyle = "#ffffff";
+    var n1 = c.p1.name.toUpperCase(), n2 = c.p2.name.toUpperCase();
+    ctx.font = "400 " + fitName(n1) + "px " + serif;
+    ctx.fillText(n1, W / 2, 250);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "italic 34px " + serif;
+    ctx.fillText("+", W / 2, 300);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "400 " + fitName(n2) + "px " + serif;
+    ctx.fillText(n2, W / 2, 355);
+
+    ctx.fillStyle = "#9a9a9a";
+    ctx.font = "24px " + mono;
+    ctx.fillText("Life Path " + c.p1.lifePath.display + "  ·  Life Path " + c.p2.lifePath.display, W / 2, 402);
+
+    var glow = ctx.createRadialGradient(W / 2, 590, 30, W / 2, 590, 300);
+    glow.addColorStop(0, "rgba(255,255,255,0.28)");
+    glow.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 330, W, 560);
+
+    ctx.fillStyle = "#9a9a9a";
+    ctx.font = "24px " + mono;
+    ctx.fillText("C O N N E C T I O N   I N D E X", W / 2, 480);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "400 210px " + serif;
+    ctx.fillText(c.overall + "%", W / 2, 665);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "italic 46px " + serif;
+    ctx.fillText(c.verdict.label, W / 2, 740);
+
+    var barTop = 800;
+    if (c.hdPair) {
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "26px " + mono;
+      ctx.fillText(c.hdPair.type1.toUpperCase() + "  +  " + c.hdPair.type2.toUpperCase(), W / 2, 795);
+      barTop = 850;
+    }
+
+    c.aspects.forEach(function (a, i) {
+      var y = barTop + i * 105;
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#9a9a9a";
+      ctx.font = "22px " + mono;
+      ctx.fillText(a.label.toUpperCase() + "   " + a.aDisplay + " · " + a.bDisplay, 120, y);
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "400 34px " + serif;
+      ctx.fillText(a.pct + "%", W - 120, y + 2);
+      ctx.fillStyle = "rgba(255,255,255,0.1)";
+      ctx.fillRect(120, y + 20, W - 240, 10);
+      var bg = ctx.createLinearGradient(120, 0, W - 120, 0);
+      bg.addColorStop(0, "#bfbfbf");
+      bg.addColorStop(1, "#ffffff");
+      ctx.fillStyle = bg;
+      ctx.fillRect(120, y + 20, (W - 240) * a.pct / 100, 10);
+    });
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(154,154,154,0.8)";
+    ctx.font = "18px " + mono;
+    ctx.fillText("Symbolic numerology — for reflection & fun", W / 2, 1290);
+
+    return cv;
+  }
+
+  function compatCardBlob(c) {
+    return new Promise(function (resolve) {
+      drawCompatCard(c).toBlob(resolve, "image/png");
+    });
+  }
+
+  function compatCardFileName(c) {
+    function slug(n) { return n.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-"); }
+    return "soul-metadata-compat-" + slug(c.p1.name) + "-" + slug(c.p2.name) + ".png";
   }
 
   /* ============ Storage ============ */
@@ -2048,14 +2816,148 @@
     el.style.display = msg ? "block" : "none";
   }
 
+  /* ============ Info popups ============ */
+
+  var INFO = {
+    core: {
+      title: "Core Numbers",
+      body:
+        "<p>The six core numbers are the backbone of a Pythagorean numerology chart. Each one is calculated from a different slice of your name or birth date, and each answers a different question:</p>" +
+        "<ul>" +
+        "<li><strong>Life Path</strong> — every digit of the full birth date, added and reduced. The storyline of the life: what you're here to learn.</li>" +
+        "<li><strong>Birth Day</strong> — just the day of the month. A specific gift you carry in the toolkit.</li>" +
+        "<li><strong>Expression</strong> (also called Destiny) — every letter of the full birth name. How your talents actually operate in the world.</li>" +
+        "<li><strong>Soul Urge</strong> (Heart's Desire) — only the vowels. The private engine: what you truly want underneath the public moves.</li>" +
+        "<li><strong>Personality</strong> — only the consonants. The outer garment: the first impression people get before they know the whole story.</li>" +
+        "<li><strong>Maturity</strong> — Life Path + Expression. Where the whole pattern is heading in the second half of life.</li>" +
+        "</ul>" +
+        "<p>Numbers are reduced by adding their digits (e.g. 34 → 3+4 → 7), except <strong>11, 22, and 33</strong> — the master numbers — which are kept whole because they carry their own meaning.</p>" +
+        "<p class=\"m-note\">A value like 14/5 shows the compound number before its final reduction — both layers speak.</p>"
+    },
+    nameReading: {
+      title: "Name Reading",
+      body:
+        "<p>This section reads the name people actually use for you, the way classic name analysis does:</p>" +
+        "<ul>" +
+        "<li><strong>Ruling number</strong> — all the letters of the first name, added and reduced. It colors day-to-day temperament more than any other single number.</li>" +
+        "<li><strong>Cornerstone</strong> — the first letter. How you open: the instinctive first move in any new situation.</li>" +
+        "<li><strong>First vowel</strong> — the first place emotion moves through the name; the quickest read on how feelings surface.</li>" +
+        "<li><strong>Family name</strong> — the surname's number, an inherited current carried by the whole family line.</li>" +
+        "</ul>" +
+        "<p>If you go by a nickname or different name, that's the vibration you live in daily — which is why the app asks for it and reads it separately from the birth-certificate name.</p>"
+    },
+    harmony: {
+      title: "Name · Birth Harmony",
+      body:
+        "<p>Inspired by the Kabalarian idea that a name serves best when it works <em>with</em> the purpose set at birth, this gauge compares your <strong>Expression</strong> (the name) with your <strong>Life Path</strong> (the birth date).</p>" +
+        "<p>Every number belongs to one of three currents:</p>" +
+        "<ul>" +
+        "<li><strong>Mental</strong> — 1 · 5 · 7: thinking, movement, analysis</li>" +
+        "<li><strong>Practical</strong> — 2 · 4 · 8: building, business, structure</li>" +
+        "<li><strong>Expressive</strong> — 3 · 6 · 9: art, care, communication</li>" +
+        "</ul>" +
+        "<p><strong>Aligned</strong> means name and path carry the same number — the instrument is tuned to the assignment. <strong>In Harmony</strong> means they share a current — different notes, same key. <strong>Cross-Currents</strong> means they pull in different directions — friction, but also range the path alone would never build.</p>"
+    },
+    hd: {
+      title: "Human Design Chart",
+      body:
+        "<p>Human Design is a modern synthesis system that maps planetary positions at your birth — and at a point about 88 days before it (the <strong>Design</strong>) — onto 64 gates in 9 energy centers. This app computes real astronomy in your browser to build the chart.</p>" +
+        "<ul>" +
+        "<li><strong>Type</strong> — one of five energy configurations (Generator, Manifesting Generator, Manifestor, Projector, Reflector). It describes how your energy is built to engage the world.</li>" +
+        "<li><strong>Strategy</strong> — the practical rule that comes with your type: how opportunities are meant to arrive.</li>" +
+        "<li><strong>Authority</strong> — your decision-making compass: where in the body a reliable yes/no actually comes from.</li>" +
+        "<li><strong>Profile</strong> — two numbers from the Sun lines (like 5/1): the costume the life purpose wears.</li>" +
+        "<li><strong>Definition</strong> — how your defined centers connect into circuits (single, split, etc.).</li>" +
+        "<li><strong>Centers</strong> — ● defined centers are consistent energy you broadcast; ○ open centers are where you absorb and amplify others.</li>" +
+        "<li><strong>Channels</strong> — gate pairs that link two centers; each is a fixed life theme.</li>" +
+        "</ul>" +
+        "<p class=\"m-note\">Birth time matters: the Moon moves ~13° a day, so an unknown time (noon fallback) can shift Moon-dependent details, and occasionally profile or type.</p>"
+    },
+    career: {
+      title: "Career Blueprint",
+      body:
+        "<p>Four of the core numbers each answer one career question:</p>" +
+        "<ul>" +
+        "<li><strong>The fields</strong> come from the <strong>Expression</strong> — the full name's talents, so these are the industries where those talents convert most naturally into a living.</li>" +
+        "<li><strong>The Arc</strong> comes from the <strong>Life Path</strong> — the shape the working life keeps taking, whatever the job title says.</li>" +
+        "<li><strong>The Fuel</strong> comes from the <strong>Soul Urge</strong> — the condition that makes work sustainable. Without it, even a prestigious role burns out.</li>" +
+        "<li><strong>The Edge</strong> comes from the <strong>Birth Day</strong> — a specific workplace superpower you can lean on anywhere.</li>" +
+        "</ul>" +
+        "<p class=\"m-note\">Symbolic guidance, not a job placement test — pair it with real-world skills, interests, and opportunities.</p>"
+    },
+    table: {
+      title: "Metadata Results",
+      body:
+        "<p>This table shows the actual math behind every number, so nothing is a black box:</p>" +
+        "<ul>" +
+        "<li><strong>Calculation</strong> — the raw letters or digits, their total, and each reduction step (34 → 7).</li>" +
+        "<li><strong>Result</strong> — the final number. A compound form like <strong>14/5</strong> means the total passed through 14 on its way to 5; both layers are read.</li>" +
+        "<li><strong>Master numbers</strong> — totals of 11, 22, or 33 are never reduced further.</li>" +
+        "</ul>" +
+        "<p>Letters convert to numbers with the Pythagorean key: A=1 B=2 C=3 … I=9, then the cycle repeats (J=1, K=2 …).</p>" +
+        "<p class=\"m-note\">If a total passes through 13, 14, 16, or 19, a Karmic Debt note appears — old-school numerology reads these as lessons carried into this life.</p>"
+    },
+    deep: {
+      title: "Deep Meaning",
+      body:
+        "<p>This is the six numbers woven into one narrative — how the layers actually interact rather than what each means alone.</p>" +
+        "<p>The Life Path sets the storyline, the Expression describes the working talents laid over it, the Soul Urge names the private engine underneath, the Personality is the outer garment people meet first, and the Maturity number points to where it's all heading.</p>" +
+        "<p>When two layers carry the same number, the reading calls it out — repeated numbers are the strongest signal in a chart, and the text adapts so nothing is said twice.</p>"
+    },
+    pattern: {
+      title: "Pattern Statement",
+      body:
+        "<p>The whole chart distilled to a few sentences: the pairing of name and path energy, what the heart runs on, whether the first impression matches the deeper current, and the one lifelong assignment the Life Path keeps setting up.</p>" +
+        "<p>It's built to be shareable — if you only remember one part of the reading, this is the part to remember.</p>"
+    },
+    compat: {
+      title: "Compatibility",
+      body:
+        "<p>The <strong>Connection Index</strong> blends four comparisons between the two charts, weighted by how much each layer shapes a relationship:</p>" +
+        "<ul>" +
+        "<li><strong>Life Direction</strong> (40%) — the two Life Paths: are the lives headed somewhere compatible?</li>" +
+        "<li><strong>Heart Connection</strong> (25%) — the two Soul Urges: do the private wants feed or drain each other?</li>" +
+        "<li><strong>Talent Blend</strong> (20%) — the two Expressions: how the gifts and working styles combine.</li>" +
+        "<li><strong>Day-to-Day Vibe</strong> (15%) — the two Personalities: how they read each other up close.</li>" +
+        "</ul>" +
+        "<p>Each pair of numbers is scored with a classic numerology affinity chart; identical numbers get a resonance boost. <strong>Mirror Numbers</strong> flag layers where both people carry the same number, and master numbers (11/22/33) are called out for the extra voltage they bring.</p>" +
+        "<p>Add both <strong>birth times</strong> and the reading includes the Human Design pairing: the two types with their strategies, plus the connection channels the bodygraphs form together — <strong>electromagnetic</strong> (each supplies the half the other is missing: attraction), <strong>companionship</strong> (both carry it whole: ease), <strong>dominance</strong> (one carries it whole: teacher/student), and <strong>compromise</strong> (one half-plugs in: mild friction).</p>" +
+        "<p class=\"m-note\">A low score isn't a verdict — it maps where the work is. Real compatibility is built, not calculated.</p>"
+    }
+  };
+
+  function openInfo(key) {
+    var info = INFO[key];
+    if (!info) return;
+    document.getElementById("modal-title").textContent = info.title;
+    document.getElementById("modal-body").innerHTML = info.body;
+    document.getElementById("modal-overlay").classList.add("show");
+    document.getElementById("modal-x").focus();
+  }
+
+  function closeInfo() {
+    document.getElementById("modal-overlay").classList.remove("show");
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".info-btn"), function (btn) {
+    btn.addEventListener("click", function () { openInfo(btn.getAttribute("data-info")); });
+  });
+  document.getElementById("modal-x").addEventListener("click", closeInfo);
+  document.getElementById("modal-overlay").addEventListener("click", function (e) {
+    if (e.target === this) closeInfo();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeInfo();
+  });
+
   function pad2(n) { return (n < 10 ? "0" : "") + n; }
 
-  // Build a validated ISO date from the three explicit fields, or return
+  // Build a validated ISO date from three explicit fields, or return
   // an error string. Month/day/year are never inferred from locale.
-  function readDateFields() {
-    var m = parseInt(document.getElementById("dob-m").value, 10);
-    var d = parseInt(document.getElementById("dob-d").value, 10);
-    var yRaw = document.getElementById("dob-y").value.trim();
+  function readDateTriple(mId, dId, yId) {
+    var m = parseInt(document.getElementById(mId).value, 10);
+    var d = parseInt(document.getElementById(dId).value, 10);
+    var yRaw = document.getElementById(yId).value.trim();
     var y = parseInt(yRaw, 10);
     if (isNaN(m) || isNaN(d) || isNaN(y)) return { error: "Enter the birth date as month, day, and 4-digit year." };
     if (yRaw.length !== 4) return { error: "Enter the year as 4 digits (e.g. 1982)." };
@@ -2067,6 +2969,8 @@
     }
     return { iso: y + "-" + pad2(m) + "-" + pad2(d) };
   }
+
+  function readDateFields() { return readDateTriple("dob-m", "dob-d", "dob-y"); }
 
   function setDateFields(iso) {
     var parts = (iso || "").split("-");
@@ -2114,9 +3018,115 @@
     });
   });
 
-  // Time-zone dropdown: common US zones first, then the full UTC range
-  (function buildTzOptions() {
-    var sel = document.getElementById("bt-tz");
+  /* ---- Compatibility form ---- */
+
+  function showCompatError(msg) {
+    var el = document.getElementById("compat-error");
+    el.textContent = msg;
+    el.style.display = msg ? "block" : "none";
+  }
+
+  // Optional birth time: both fields blank means "skip the HD pairing".
+  function readTimeTriple(hId, mId, apId) {
+    var hRaw = document.getElementById(hId).value.trim();
+    var mRaw = document.getElementById(mId).value.trim();
+    if (!hRaw && !mRaw) return { skip: true };
+    var h = parseInt(hRaw, 10);
+    var mm = parseInt(mRaw || "0", 10);
+    if (isNaN(h) || h < 1 || h > 12) return { error: "birth hour must be 1–12 (or leave the time blank)." };
+    if (isNaN(mm) || mm < 0 || mm > 59) return { error: "birth minutes must be 00–59." };
+    var ap = document.getElementById(apId).value;
+    return { h24: (h % 12) + (ap === "PM" ? 12 : 0), min: mm };
+  }
+
+  var currentCompat = null;
+
+  function handleCompat() {
+    // Person One inherits the main form if left blank
+    if (!cleanLetters(document.getElementById("c1-name").value) &&
+        cleanLetters(document.getElementById("name").value)) {
+      document.getElementById("c1-name").value = document.getElementById("name").value;
+      document.getElementById("c1-m").value = document.getElementById("dob-m").value;
+      document.getElementById("c1-d").value = document.getElementById("dob-d").value;
+      document.getElementById("c1-y").value = document.getElementById("dob-y").value;
+      var mainTime = readTimeFields();
+      if (mainTime.known) {
+        document.getElementById("c1-h").value = document.getElementById("bt-h").value;
+        document.getElementById("c1-min").value = document.getElementById("bt-min").value;
+        document.getElementById("c1-ap").value = document.getElementById("bt-ap").value;
+        document.getElementById("c1-tz").value = document.getElementById("bt-tz").value;
+      }
+    }
+    var n1 = document.getElementById("c1-name").value;
+    var n2 = document.getElementById("c2-name").value;
+    if (!cleanLetters(n1)) { showCompatError("Enter Person One's full name using letters A–Z."); return; }
+    if (!cleanLetters(n2)) { showCompatError("Enter Person Two's full name using letters A–Z."); return; }
+    var d1 = readDateTriple("c1-m", "c1-d", "c1-y");
+    if (d1.error) { showCompatError("Person One: " + d1.error); return; }
+    var d2 = readDateTriple("c2-m", "c2-d", "c2-y");
+    if (d2.error) { showCompatError("Person Two: " + d2.error); return; }
+    var t1 = readTimeTriple("c1-h", "c1-min", "c1-ap");
+    if (t1.error) { showCompatError("Person One: " + t1.error); return; }
+    var t2 = readTimeTriple("c2-h", "c2-min", "c2-ap");
+    if (t2.error) { showCompatError("Person Two: " + t2.error); return; }
+    showCompatError("");
+
+    var comp = computeCompatibility(computeProfile(n1, d1.iso), computeProfile(n2, d2.iso));
+    if (!t1.skip && !t2.skip) {
+      var hd1 = computeHumanDesign(d1.iso, t1.h24, t1.min, parseFloat(document.getElementById("c1-tz").value));
+      var hd2 = computeHumanDesign(d2.iso, t2.h24, t2.min, parseFloat(document.getElementById("c2-tz").value));
+      comp.hdPair = computeHDPairing(hd1, hd2);
+    }
+    currentCompat = comp;
+    var body = document.getElementById("compat-body");
+    body.innerHTML = compatHTML(comp);
+    body.style.display = "block";
+    body.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // Card buttons live inside re-rendered HTML — delegate from the container.
+  document.getElementById("compat-body").addEventListener("click", function (e) {
+    var id = e.target && e.target.id;
+    if (!currentCompat) return;
+    if (id === "compat-download-btn") {
+      compatCardBlob(currentCompat).then(function (blob) {
+        if (!blob) { toast("Could not create the card image"); return; }
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = compatCardFileName(currentCompat);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+        toast("Card saved — check your downloads");
+      });
+    } else if (id === "compat-share-btn") {
+      var c = currentCompat;
+      compatCardBlob(c).then(function (blob) {
+        var file = blob ? new File([blob], compatCardFileName(c), { type: "image/png" }) : null;
+        var text = c.p1.name + " + " + c.p2.name + " · " + c.overall + "% · " + c.verdict.label;
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: "Soul Metadata Compatibility", text: text }).catch(function () {});
+        } else if (navigator.share) {
+          navigator.share({ title: "Soul Metadata Compatibility", text: text }).catch(function () {});
+        } else {
+          toast("Sharing isn’t supported here — use Download Card instead");
+        }
+      });
+    }
+  });
+
+  document.getElementById("compat-btn").addEventListener("click", handleCompat);
+  ["c1-name", "c1-m", "c1-d", "c1-y", "c2-name", "c2-m", "c2-d", "c2-y"].forEach(function (id) {
+    document.getElementById(id).addEventListener("keydown", function (e) {
+      if (e.key === "Enter") handleCompat();
+    });
+  });
+
+  // Time-zone dropdowns: common US zones first, then the full UTC range
+  function buildTzOptions(selId) {
+    var sel = document.getElementById(selId);
     var named = [
       [-5, "Eastern (winter) UTC-5"], [-4, "Eastern DST UTC-4"],
       [-6, "Central (winter) UTC-6"], [-5.01, null],
@@ -2140,7 +3150,8 @@
       sel.appendChild(opt2);
     }
     sel.value = "-5";
-  })();
+  }
+  ["bt-tz", "c1-tz", "c2-tz"].forEach(buildTzOptions);
 
   document.getElementById("bt-unknown").addEventListener("change", function () {
     var off = this.checked;
@@ -2150,7 +3161,9 @@
   });
 
   // Digits only + auto-advance across the three date boxes
-  [["dob-m", "dob-d"], ["dob-d", "dob-y"], ["dob-y", null]].forEach(function (pair) {
+  [["dob-m", "dob-d"], ["dob-d", "dob-y"], ["dob-y", null],
+   ["c1-m", "c1-d"], ["c1-d", "c1-y"], ["c1-y", null],
+   ["c2-m", "c2-d"], ["c2-d", "c2-y"], ["c2-y", null]].forEach(function (pair) {
     var el = document.getElementById(pair[0]);
     el.addEventListener("input", function () {
       el.value = el.value.replace(/\D/g, "");
@@ -2260,6 +3273,13 @@
     triadOf: triadOf,
     nameReadingHTML: nameReadingHTML,
     harmonyHTML: harmonyHTML,
+    careerHTML: careerHTML,
+    computeCompatibility: computeCompatibility,
+    compatHTML: compatHTML,
+    pairRating: pairRating,
+    computeHDPairing: computeHDPairing,
+    hdPairHTML: hdPairHTML,
+    drawCompatCard: drawCompatCard,
     computeHumanDesign: computeHumanDesign,
     sunLongitude: sunLongitude,
     moonLongitude: moonLongitude,
