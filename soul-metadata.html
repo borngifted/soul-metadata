@@ -4,21 +4,25 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Soul Metadata</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z'/%3E%3C/svg%3E" />
 <style>
   :root {
-    --bg: #0b0b11;
-    --bg-glow: #1c1a2b;
-    --panel: rgba(255, 255, 255, 0.035);
-    --panel-solid: #15141d;
-    --line: rgba(216, 180, 90, 0.18);
-    --line-soft: rgba(255, 255, 255, 0.08);
-    --gold: #d8b45a;
-    --gold-bright: #f0d489;
-    --gold-dim: rgba(216, 180, 90, 0.55);
-    --text: #f2edde;
-    --muted: #a09eae;
-    --serif: "Didot", "Bodoni 72", "Playfair Display", "Times New Roman", serif;
-    --sans: -apple-system, BlinkMacSystemFont, "Avenir Next", "Segoe UI", Roboto, sans-serif;
+    --bg: #000000;
+    --bg-glow: #0a0a0a;
+    --panel: rgba(255, 255, 255, 0.02);
+    --panel-solid: #0a0a0a;
+    --line: rgba(255, 255, 255, 0.3);
+    --line-soft: rgba(255, 255, 255, 0.14);
+    --gold: #ffffff;
+    --gold-bright: #ffffff;
+    --gold-dim: rgba(255, 255, 255, 0.55);
+    --text: #f4f4f4;
+    --muted: #8f8f8f;
+    --serif: "Anton", "Arial Narrow", "Helvetica Neue", Impact, sans-serif;
+    --sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
     --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
     color-scheme: dark;
   }
@@ -29,8 +33,7 @@
 
   body {
     background:
-      radial-gradient(ellipse 120% 60% at 50% -10%, var(--bg-glow), transparent 60%),
-      radial-gradient(ellipse 80% 50% at 80% 110%, #171325, transparent 60%),
+      radial-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1.4px) 0 0 / 26px 26px,
       var(--bg);
     color: var(--text);
     font-family: var(--sans);
@@ -76,6 +79,44 @@
     margin: 0 auto;
     font-size: 1rem;
   }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .marquee {
+    overflow: hidden;
+    border-bottom: 1px solid var(--line-soft);
+    background: #000;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #fff;
+    padding: 11px 0;
+    white-space: nowrap;
+  }
+  .marquee-track { display: inline-block; white-space: nowrap; animation: marq 30s linear infinite; }
+  .marquee-track span { display: inline-block; padding-right: 2ch; }
+  @keyframes marq { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+  .wordmark {
+    width: min(600px, 88vw);
+    height: auto;
+    display: block;
+    margin: 0 auto 6px;
+    overflow: visible;
+  }
+  .wordmark text { font-family: var(--serif); fill: #fff; }
+  .wordmark .wm-line1 { font-size: 126px; letter-spacing: 4px; }
+  .wordmark .wm-line2 { font-size: 88px; letter-spacing: 6px; }
+  .wordmark .wm-star { fill: #fff; }
 
   /* ---------- Panels ---------- */
   .panel {
@@ -95,6 +136,11 @@
     display: flex;
     align-items: center;
     gap: 12px;
+  }
+  .panel-title::before {
+    content: "\2605";
+    font-size: 0.6rem;
+    color: var(--gold);
   }
   .panel-title::after {
     content: "";
@@ -212,7 +258,7 @@
   }
   .center-chip.on {
     border-color: var(--gold-dim);
-    background: rgba(216, 180, 90, 0.14);
+    background: rgba(255, 255, 255, 0.14);
     color: var(--gold-bright);
   }
   .hd-note { color: var(--muted); font-size: 0.82rem; margin: 14px 0 0; max-width: 62ch; }
@@ -251,17 +297,17 @@
     transition: background 0.2s, color 0.2s, border-color 0.2s;
     min-height: 48px;
   }
-  .btn:hover { background: rgba(216, 180, 90, 0.1); }
+  .btn:hover { background: rgba(255, 255, 255, 0.1); }
   .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   .btn-primary {
-    background: linear-gradient(180deg, #e3c26e, #c29a3f);
-    color: #17130a;
+    background: #ffffff;
+    color: #000;
     border: none;
     font-weight: 700;
     width: 100%;
     margin-top: 22px;
   }
-  .btn-primary:hover { background: linear-gradient(180deg, #f0d489, #d0a94e); }
+  .btn-primary:hover { background: #e6e6e6; }
   .error {
     color: #e8a1a1;
     font-size: 0.88rem;
@@ -280,7 +326,7 @@
     font-size: clamp(6rem, 26vw, 9.5rem);
     line-height: 0.9;
     color: var(--gold-bright);
-    text-shadow: 0 0 70px rgba(216, 180, 90, 0.35);
+    text-shadow: 0 0 70px rgba(255, 255, 255, 0.35);
     display: block;
   }
   .hero-num .big-label {
@@ -350,7 +396,7 @@
     font-size: 0.58rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: #17130a;
+    color: #000;
     background: var(--gold);
     border-radius: 2px;
     padding: 2px 6px;
@@ -390,7 +436,7 @@
   }
   .reading-list li:last-child { border-bottom: none; }
   .reading-list li::before {
-    content: "◆";
+    content: "★";
     position: absolute;
     left: 0;
     top: 12px;
@@ -466,8 +512,8 @@
     color: var(--gold-bright);
     white-space: nowrap;
   }
-  .h-verdict.aligned { background: linear-gradient(180deg, #e3c26e, #c29a3f); color: #17130a; border: none; }
-  .h-verdict.harmonious { background: rgba(216, 180, 90, 0.14); }
+  .h-verdict.aligned { background: #ffffff; color: #000; border: none; }
+  .h-verdict.harmonious { background: rgba(255, 255, 255, 0.14); }
   .harmony-text { color: var(--text); max-width: 62ch; margin: 0 0 12px; }
   .harmony-note { color: var(--muted); font-size: 0.85rem; margin: 0; max-width: 62ch; }
 
@@ -511,7 +557,7 @@
     margin: 0;
     padding: 20px 22px;
     border-left: 2px solid var(--gold);
-    background: rgba(216, 180, 90, 0.05);
+    background: rgba(255, 255, 255, 0.05);
     font-family: var(--serif);
     font-style: italic;
     font-size: 1.12rem;
@@ -520,7 +566,7 @@
   .karmic {
     border: 1px solid var(--line);
     border-radius: 4px;
-    background: rgba(216, 180, 90, 0.04);
+    background: rgba(255, 255, 255, 0.04);
     padding: 16px 18px;
     margin-top: 16px;
     font-size: 0.92rem;
@@ -548,7 +594,7 @@
     bottom: 28px;
     transform: translateX(-50%) translateY(80px);
     background: var(--gold);
-    color: #17130a;
+    color: #000;
     font-family: var(--mono);
     font-size: 0.78rem;
     letter-spacing: 0.08em;
@@ -643,7 +689,7 @@
     font-size: clamp(4rem, 16vw, 5.6rem);
     line-height: 1;
     color: var(--gold-bright);
-    text-shadow: 0 0 60px rgba(216, 180, 90, 0.35);
+    text-shadow: 0 0 60px rgba(255, 255, 255, 0.35);
     font-variant-numeric: tabular-nums;
   }
   .compat-score .cs-verdict {
@@ -689,7 +735,7 @@
   }
   .c-fill {
     height: 100%;
-    background: linear-gradient(90deg, #c29a3f, #f0d489);
+    background: linear-gradient(90deg, #9a9a9a, #ffffff);
     border-radius: 999px;
   }
   .c-text { color: var(--text); font-size: 0.92rem; max-width: 62ch; margin: 0; }
@@ -714,7 +760,7 @@
     justify-content: center;
     transition: background 0.2s;
   }
-  .info-btn:hover { background: rgba(216, 180, 90, 0.14); }
+  .info-btn:hover { background: rgba(255, 255, 255, 0.14); }
   .info-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   .modal-overlay {
     position: fixed;
@@ -778,10 +824,28 @@
 
 </head>
 <body>
+<div class="marquee" aria-hidden="true"><div class="marquee-track">
+  <span>Welcome to ★ Soul Metadata ★ read the code behind the name ★ numerology · human design · compatibility · career ★ your whole pattern, decoded ★</span>
+  <span>Welcome to ★ Soul Metadata ★ read the code behind the name ★ numerology · human design · compatibility · career ★ your whole pattern, decoded ★</span>
+</div></div>
 <div class="wrap">
   <header>
-    <span class="eyebrow">Soul Metadata</span>
-    <h1>Read the code<br />behind <em>the name.</em></h1>
+    <h1 class="sr-only">Soul Metadata — read the code behind the name</h1>
+    <svg class="wordmark" viewBox="0 0 700 250" role="img" aria-label="Soul Metadata">
+      <defs>
+        <filter id="wm-warp" x="-15%" y="-15%" width="130%" height="130%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.012 0.055" numOctaves="2" seed="11" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="20" />
+        </filter>
+      </defs>
+      <g filter="url(#wm-warp)" transform="rotate(-5 350 125)">
+        <text x="350" y="120" text-anchor="middle" class="wm-line1">SOUL</text>
+        <text x="350" y="220" text-anchor="middle" class="wm-line2">METADATA</text>
+      </g>
+      <path class="wm-star" transform="translate(548 26) scale(1.2)" d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z" />
+      <path class="wm-star" transform="translate(92 192) scale(0.7)" d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z" />
+    </svg>
+    <span class="eyebrow">★ Read the code behind the name ★</span>
     <p>Enter a full birth name and date of birth to generate a symbolic numerology profile — six layers of Pythagorean metadata, decoded.</p>
   </header>
 
@@ -2431,6 +2495,15 @@
 
   /* ============ Share card (canvas) ============ */
 
+  function cardDots(ctx, W, H) {
+    ctx.fillStyle = "rgba(255,255,255,0.10)";
+    for (var y = 64; y < H - 56; y += 26) {
+      for (var x = 64; x < W - 56; x += 26) {
+        ctx.fillRect(x, y, 2, 2);
+      }
+    }
+  }
+
   function drawCard(p) {
     var W = 1080, H = 1350;
     var cv = document.createElement("canvas");
@@ -2438,52 +2511,53 @@
     var ctx = cv.getContext("2d");
 
     var g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#1c1a2b");
-    g.addColorStop(0.4, "#0b0b11");
-    g.addColorStop(1, "#0e0c16");
+    g.addColorStop(0, "#0a0a0a");
+    g.addColorStop(0.4, "#000000");
+    g.addColorStop(1, "#000000");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
 
-    ctx.strokeStyle = "rgba(216,180,90,0.5)";
+    ctx.strokeStyle = "rgba(255,255,255,0.5)";
     ctx.lineWidth = 2;
     ctx.strokeRect(40, 40, W - 80, H - 80);
-    ctx.strokeStyle = "rgba(216,180,90,0.18)";
+    ctx.strokeStyle = "rgba(255,255,255,0.18)";
     ctx.strokeRect(52, 52, W - 104, H - 104);
+    cardDots(ctx, W, H);
 
-    var serif = '"Didot","Bodoni 72",Georgia,serif';
+    var serif = '"Anton","Arial Narrow",Impact,sans-serif';
     var mono = '"SF Mono",Menlo,monospace';
 
     ctx.textAlign = "center";
-    ctx.fillStyle = "#d8b45a";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "600 30px " + mono;
     ctx.fillText("S O U L   M E T A D A T A", W / 2, 140);
 
-    ctx.fillStyle = "#f2edde";
+    ctx.fillStyle = "#ffffff";
     var nm = p.name.toUpperCase();
     var nmSize = nm.length > 22 ? 44 : 56;
     ctx.font = "400 " + nmSize + "px " + serif;
     ctx.fillText(nm, W / 2, 225);
 
-    ctx.fillStyle = "#a09eae";
+    ctx.fillStyle = "#9a9a9a";
     ctx.font = "26px " + mono;
     ctx.fillText(p.dobPretty, W / 2, 272);
 
     // Glow behind big number
     var glow = ctx.createRadialGradient(W / 2, 520, 30, W / 2, 520, 320);
-    glow.addColorStop(0, "rgba(216,180,90,0.28)");
-    glow.addColorStop(1, "rgba(216,180,90,0)");
+    glow.addColorStop(0, "rgba(255,255,255,0.28)");
+    glow.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = glow;
     ctx.fillRect(0, 220, W, 640);
 
-    ctx.fillStyle = "#a09eae";
+    ctx.fillStyle = "#9a9a9a";
     ctx.font = "24px " + mono;
     ctx.fillText("L I F E   P A T H", W / 2, 390);
 
-    ctx.fillStyle = "#f0d489";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "400 300px " + serif;
     ctx.fillText(String(p.lifePath.final), W / 2, 645);
 
-    ctx.fillStyle = "#f2edde";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "italic 52px " + serif;
     ctx.fillText(CORE[p.lifePath.final].title, W / 2, 730);
 
@@ -2493,21 +2567,21 @@
       var r = p[d[0]];
       var cx = 80 + cw * (i % cols) + cw / 2;
       var cy = 850 + Math.floor(i / cols) * 170;
-      ctx.fillStyle = "#a09eae";
+      ctx.fillStyle = "#9a9a9a";
       ctx.font = "20px " + mono;
       ctx.fillText(d[1].toUpperCase(), cx, cy);
-      ctx.fillStyle = "#f0d489";
+      ctx.fillStyle = "#ffffff";
       ctx.font = "400 64px " + serif;
       ctx.fillText(r.display, cx, cy + 70);
     });
 
     // Pattern line (wrapped)
-    ctx.fillStyle = "#c9c4b2";
+    ctx.fillStyle = "#cfcfcf";
     ctx.font = "italic 30px " + serif;
     var lesson = "The lesson: " + LESSONS[p.lifePath.final] + ".";
     wrapText(ctx, lesson, W / 2, 1205, W - 220, 40);
 
-    ctx.fillStyle = "rgba(160,158,174,0.7)";
+    ctx.fillStyle = "rgba(154,154,154,0.8)";
     ctx.font = "18px " + mono;
     ctx.fillText("Symbolic numerology — for reflection & fun", W / 2, 1290);
 
@@ -2549,66 +2623,67 @@
     var ctx = cv.getContext("2d");
 
     var g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#1c1a2b");
-    g.addColorStop(0.4, "#0b0b11");
-    g.addColorStop(1, "#0e0c16");
+    g.addColorStop(0, "#0a0a0a");
+    g.addColorStop(0.4, "#000000");
+    g.addColorStop(1, "#000000");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
 
-    ctx.strokeStyle = "rgba(216,180,90,0.5)";
+    ctx.strokeStyle = "rgba(255,255,255,0.5)";
     ctx.lineWidth = 2;
     ctx.strokeRect(40, 40, W - 80, H - 80);
-    ctx.strokeStyle = "rgba(216,180,90,0.18)";
+    ctx.strokeStyle = "rgba(255,255,255,0.18)";
     ctx.strokeRect(52, 52, W - 104, H - 104);
+    cardDots(ctx, W, H);
 
-    var serif = '"Didot","Bodoni 72",Georgia,serif';
+    var serif = '"Anton","Arial Narrow",Impact,sans-serif';
     var mono = '"SF Mono",Menlo,monospace';
 
     ctx.textAlign = "center";
-    ctx.fillStyle = "#d8b45a";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "600 28px " + mono;
     ctx.fillText("S O U L   M E T A D A T A", W / 2, 130);
-    ctx.fillStyle = "#a09eae";
+    ctx.fillStyle = "#9a9a9a";
     ctx.font = "600 22px " + mono;
     ctx.fillText("C O M P A T I B I L I T Y", W / 2, 170);
 
     function fitName(nm) { return nm.length > 24 ? 38 : 48; }
-    ctx.fillStyle = "#f2edde";
+    ctx.fillStyle = "#ffffff";
     var n1 = c.p1.name.toUpperCase(), n2 = c.p2.name.toUpperCase();
     ctx.font = "400 " + fitName(n1) + "px " + serif;
     ctx.fillText(n1, W / 2, 250);
-    ctx.fillStyle = "#d8b45a";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "italic 34px " + serif;
     ctx.fillText("+", W / 2, 300);
-    ctx.fillStyle = "#f2edde";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "400 " + fitName(n2) + "px " + serif;
     ctx.fillText(n2, W / 2, 355);
 
-    ctx.fillStyle = "#a09eae";
+    ctx.fillStyle = "#9a9a9a";
     ctx.font = "24px " + mono;
     ctx.fillText("Life Path " + c.p1.lifePath.display + "  ·  Life Path " + c.p2.lifePath.display, W / 2, 402);
 
     var glow = ctx.createRadialGradient(W / 2, 590, 30, W / 2, 590, 300);
-    glow.addColorStop(0, "rgba(216,180,90,0.28)");
-    glow.addColorStop(1, "rgba(216,180,90,0)");
+    glow.addColorStop(0, "rgba(255,255,255,0.28)");
+    glow.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = glow;
     ctx.fillRect(0, 330, W, 560);
 
-    ctx.fillStyle = "#a09eae";
+    ctx.fillStyle = "#9a9a9a";
     ctx.font = "24px " + mono;
     ctx.fillText("C O N N E C T I O N   I N D E X", W / 2, 480);
 
-    ctx.fillStyle = "#f0d489";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "400 210px " + serif;
     ctx.fillText(c.overall + "%", W / 2, 665);
 
-    ctx.fillStyle = "#f2edde";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "italic 46px " + serif;
     ctx.fillText(c.verdict.label, W / 2, 740);
 
     var barTop = 800;
     if (c.hdPair) {
-      ctx.fillStyle = "#d8b45a";
+      ctx.fillStyle = "#ffffff";
       ctx.font = "26px " + mono;
       ctx.fillText(c.hdPair.type1.toUpperCase() + "  +  " + c.hdPair.type2.toUpperCase(), W / 2, 795);
       barTop = 850;
@@ -2617,24 +2692,24 @@
     c.aspects.forEach(function (a, i) {
       var y = barTop + i * 105;
       ctx.textAlign = "left";
-      ctx.fillStyle = "#a09eae";
+      ctx.fillStyle = "#9a9a9a";
       ctx.font = "22px " + mono;
       ctx.fillText(a.label.toUpperCase() + "   " + a.aDisplay + " · " + a.bDisplay, 120, y);
       ctx.textAlign = "right";
-      ctx.fillStyle = "#f0d489";
+      ctx.fillStyle = "#ffffff";
       ctx.font = "400 34px " + serif;
       ctx.fillText(a.pct + "%", W - 120, y + 2);
       ctx.fillStyle = "rgba(255,255,255,0.1)";
       ctx.fillRect(120, y + 20, W - 240, 10);
       var bg = ctx.createLinearGradient(120, 0, W - 120, 0);
-      bg.addColorStop(0, "#c29a3f");
-      bg.addColorStop(1, "#f0d489");
+      bg.addColorStop(0, "#bfbfbf");
+      bg.addColorStop(1, "#ffffff");
       ctx.fillStyle = bg;
       ctx.fillRect(120, y + 20, (W - 240) * a.pct / 100, 10);
     });
 
     ctx.textAlign = "center";
-    ctx.fillStyle = "rgba(160,158,174,0.7)";
+    ctx.fillStyle = "rgba(154,154,154,0.8)";
     ctx.font = "18px " + mono;
     ctx.fillText("Symbolic numerology — for reflection & fun", W / 2, 1290);
 
