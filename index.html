@@ -1709,6 +1709,44 @@
     { key: "personality", label: "Day-to-Day Vibe",  weight: 0.15 }
   ];
 
+  /* ---- Personal cycles at the moment of reading ----
+     Cycle numbers conventionally reduce fully to 1–9 (no master hold). */
+
+  function computeMoment(profile, now) {
+    var parts = profile.dobISO.split("-");
+    var personalYear = reduceToDigit(parseInt(parts[1], 10) + parseInt(parts[2], 10) + digitSum(now.getFullYear()));
+    var personalMonth = reduceToDigit(personalYear + now.getMonth() + 1);
+    var personalDay = reduceToDigit(personalMonth + now.getDate());
+    return {
+      personalYear: personalYear,
+      personalMonth: personalMonth,
+      personalDay: personalDay,
+      momentNumber: reduceToDigit(personalDay + now.getHours())
+    };
+  }
+
+  var MOMENT_TEXT = {
+    5: "Right now the two daily currents run in the same direction — a moment for plans made together, big asks, and starting things.",
+    4: "Today's energies feed each other: what one starts, the other naturally carries. A good day for shared decisions.",
+    3: "Neutral daily weather — neither current pushes the other. A day for easy company rather than big moves together.",
+    2: "The two days pull differently right now: one wants motion, the other wants ground. Keep today's shared plans light.",
+    1: "Opposite daily currents at this moment — friction is likelier today than most days. Save the big conversation for a different sky."
+  };
+
+  function momentPairing(p1, p2, now) {
+    var m1 = computeMoment(p1, now), m2 = computeMoment(p2, now);
+    var rating = pairRating(m1.personalDay, m2.personalDay);
+    var pct = RATING_PCT[rating];
+    if (m1.personalDay === m2.personalDay) pct = Math.max(pct, 88);
+    return { now: now, p1: m1, p2: m2, rating: rating, pct: pct, text: MOMENT_TEXT[rating] };
+  }
+
+  function momentStamp(now) {
+    return "Read " +
+      now.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" }) +
+      " · " + now.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  }
+
   // {A} and {B} are replaced with the two ROLES phrases.
   var COMPAT_TEXT = {
     lifePath: {
@@ -1827,6 +1865,22 @@
 
     html += '<p class="harmony-text" style="margin-top:18px"><strong style="color:var(--gold-bright)">Where the work is:</strong> ' +
       esc(COMPAT_ADVICE[c.weakest.key]) + "</p>";
+
+    if (c.moment) {
+      var mo = c.moment;
+      var cycleLine = function (name, m) {
+        return esc(name) + " — Personal Year " + m.personalYear + " · Month " + m.personalMonth +
+          " · Day " + m.personalDay + " · Moment " + m.momentNumber;
+      };
+      html += '<div class="c-aspect" style="margin-top:20px">' +
+        '<div class="c-aspect-head"><span class="ca-label">This Moment <button class="info-btn" type="button" data-info="moment" aria-label="About This Moment">i</button>' +
+        '<span class="ca-nums">Personal Day ' + mo.p1.personalDay + " · " + mo.p2.personalDay + "</span></span>" +
+        '<span class="ca-pct">' + mo.pct + "%</span></div>" +
+        '<div class="c-bar"><div class="c-fill" style="width:' + mo.pct + '%"></div></div>' +
+        '<p class="c-text"><strong>' + esc(momentStamp(mo.now)) + ".</strong> " + esc(mo.text) + "</p>" +
+        '<p class="harmony-note" style="margin-top:8px">' + cycleLine(c.p1.name, mo.p1) + "<br>" + cycleLine(c.p2.name, mo.p2) + "</p>" +
+        '<p class="harmony-note">Recalculated from the real date and time each time the connection is read — the Connection Index above is the climate; this is today’s weather.</p></div>';
+    }
 
     if (c.hdPair) {
       html += hdPairHTML(c.hdPair, c.p1.name, c.p2.name);
@@ -2315,6 +2369,13 @@
     });
 
     ctx.textAlign = "center";
+    if (c.moment) {
+      ctx.fillStyle = "#82795f";
+      ctx.font = "20px " + mono;
+      var stamp = c.moment.now.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" }) +
+        " · " + c.moment.now.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+      ctx.fillText(("Read " + stamp + "  ·  This Moment " + c.moment.pct + "%").toUpperCase(), W / 2, 1248);
+    }
     ctx.fillStyle = "rgba(130,121,95,0.9)";
     ctx.font = "18px " + mono;
     ctx.fillText("Symbolic numerology — for reflection & fun", W / 2, 1290);
@@ -2529,6 +2590,14 @@
         "<p>Each pair of numbers is scored with a classic numerology affinity chart; identical numbers get a resonance boost. <strong>Mirror Numbers</strong> flag layers where both people carry the same number, and master numbers (11/22/33) are called out for the extra voltage they bring.</p>" +
         "<p>Add both <strong>birth times</strong> and the reading includes the Human Design pairing: the two types with their strategies, plus the connection channels the bodygraphs form together — <strong>electromagnetic</strong> (each supplies the half the other is missing: attraction), <strong>companionship</strong> (both carry it whole: ease), <strong>dominance</strong> (one carries it whole: teacher/student), and <strong>compromise</strong> (one half-plugs in: mild friction).</p>" +
         "<p class=\"m-note\">A low score isn't a verdict — it maps where the work is. Real compatibility is built, not calculated.</p>"
+    },
+    moment: {
+      title: "This Moment",
+      body:
+        "<p>This section is computed from the <strong>actual date and time</strong> at the instant you press “Read the Connection” — it changes with the day (and the hour), while the Connection Index above never does.</p>" +
+        "<p>Numerology tracks personal cycles: the <strong>Personal Year</strong> (birth month + birth day + current year), the <strong>Personal Month</strong> (Personal Year + current month), and the <strong>Personal Day</strong> (Personal Month + current day), each reduced to a single digit. The <strong>Moment number</strong> folds in the current hour for the flavor of right now.</p>" +
+        "<p>The bar compares the two Personal Days using the same affinity chart as the aspects above — think of it as today's weather between the charts, where the Connection Index is the climate.</p>" +
+        "<p class=\"m-note\">Run the reading tomorrow and this section will be different — that's the point.</p>"
     }
   };
 
@@ -2678,6 +2747,7 @@
     showCompatError("");
 
     var comp = computeCompatibility(computeProfile(n1, d1.iso), computeProfile(n2, d2.iso));
+    comp.moment = momentPairing(comp.p1, comp.p2, new Date());
     if (!t1.skip && !t2.skip) {
       var hd1 = computeHumanDesign(d1.iso, t1.h24, t1.min, parseFloat(document.getElementById("c1-tz").value));
       var hd2 = computeHumanDesign(d2.iso, t2.h24, t2.min, parseFloat(document.getElementById("c2-tz").value));
@@ -2692,6 +2762,12 @@
 
   // Card buttons live inside re-rendered HTML — delegate from the container.
   document.getElementById("compat-body").addEventListener("click", function (e) {
+    // The This Moment info button is inserted after load, so the static
+    // .info-btn wiring never sees it — handle it here by delegation.
+    if (e.target && e.target.classList && e.target.classList.contains("info-btn")) {
+      openInfo(e.target.getAttribute("data-info"));
+      return;
+    }
     var id = e.target && e.target.id;
     if (!currentCompat) return;
     if (id === "compat-download-btn") {
@@ -2882,6 +2958,8 @@
     careerHTML: careerHTML,
     computeCompatibility: computeCompatibility,
     compatHTML: compatHTML,
+    computeMoment: computeMoment,
+    momentPairing: momentPairing,
     pairRating: pairRating,
     computeHDPairing: computeHDPairing,
     hdPairHTML: hdPairHTML,
