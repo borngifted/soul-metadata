@@ -3605,77 +3605,80 @@
 
 <script>
 /* ===== SOUL ENERGY: every scene background is a scrubbed transition =====
-   Each scene's background is a Kling start-frame/end-frame render that morphs that
-   scene's image into the next one's, so scrolling the page is one continuous
-   transformation and each seam lands exactly on the next scene's opening frame.
+   Each background is a Kling start-frame/end-frame render morphing that scene's
+   image into the next scene's, so scrolling is one continuous transformation.
    Frames are decoded WebP painted to canvas — no video seeking, so no stutter.
-   Sequences load lazily as their scene approaches; preloading all 366 would jank. */
+
+   Every .scene-media on the page is picked up and its sequence derived from the
+   image it already references, rather than from a hand-written selector list —
+   several scenes reuse the same artwork and a fixed list silently missed them.
+   Sequences are shared across the scenes that use them, so 11 backgrounds cost
+   6 downloads. */
 (function(){
   var FRAMES=61, DUR=5.04, MAXW=1600;
-  var SCENES=[
-    {sel:"#intro",                dir:"media/seq/s1/"},
-    {sel:"#input-panel",          dir:"media/seq/s2/", cue:"input"},
-    {sel:".scene.results-intro",  dir:"media/seq/s3/"},
-    {sel:"#identity-section",     dir:"media/seq/s4/", cue:"reading"},
-    {sel:"#compat-panel",         dir:"media/seq/s5/"},
-    {sel:"#compat-reveal",        dir:"media/seq/s6/", cue:"compat"}
-  ];
   var CUES={
-    input:[{f:0.25,t:1.75,x:"NAME IS SIGNAL."},{f:1.75,t:3.35,x:"BIRTH IS RHYTHM."},{f:3.35,t:5.10,x:"ENTER THE PATTERN."}],
-    reading:[{f:0.20,t:1.80,x:"THE CODE OPENS."},{f:1.80,t:3.45,x:"STRUCTURE BECOMES STORY."},{f:3.45,t:5.10,x:"CLARITY CHANGES COLOR."}],
-    compat:[{f:0.20,t:1.70,x:"ONE SIGNAL BECOMES TWO."},{f:1.70,t:3.35,x:"A SECOND CURRENT ENTERS."},{f:3.35,t:5.10,x:"READ THE CONNECTION."}]
+    "transition-input":[{f:0.25,t:1.75,x:"NAME IS SIGNAL."},{f:1.75,t:3.35,x:"BIRTH IS RHYTHM."},{f:3.35,t:5.10,x:"ENTER THE PATTERN."}],
+    "transition-reading":[{f:0.20,t:1.80,x:"THE CODE OPENS."},{f:1.80,t:3.45,x:"STRUCTURE BECOMES STORY."},{f:3.45,t:5.10,x:"CLARITY CHANGES COLOR."}],
+    "transition-compat":[{f:0.20,t:1.70,x:"ONE SIGNAL BECOMES TWO."},{f:1.70,t:3.35,x:"A SECOND CURRENT ENTERS."},{f:3.35,t:5.10,x:"READ THE CONNECTION."}]
   };
+  var CUE_BY_SCENE={"input-panel":"transition-input","identity-section":"transition-reading","compat-reveal":"transition-compat"};
 
   if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   function pad(n){n=String(n);while(n.length<3)n="0"+n;return n;}
 
-  var items=[];
-  SCENES.forEach(function(cfg){
-    var scene=document.querySelector(cfg.sel); if(!scene) return;
-    var media=scene.querySelector(".scene-media"); if(!media) return;
-    var img=media.querySelector("img");
-    var cv=document.createElement("canvas");
-    cv.className="motion-canvas"; cv.setAttribute("aria-hidden","true");
-    cv.style.cssText="position:absolute;inset:0;width:100%;height:100%;display:none;z-index:1;";
-    media.insertBefore(cv, img ? img.nextSibling : media.firstChild);
-    items.push({scene:scene, media:media, img:img, cv:cv, ctx:cv.getContext("2d",{alpha:false}),
-                dir:cfg.dir, cue:cfg.cue||null, cap:media.querySelector(".video-caption"),
-                imgs:null, loaded:0, ready:false, started:false, cur:-1, want:0, last:null,
-                atTop: scene.getBoundingClientRect().top + window.scrollY < window.innerHeight*0.5});
-  });
-  if(!items.length) return;
-
-  function load(it){
-    if(it.started) return; it.started=true;
-    it.imgs=new Array(FRAMES);
+  var seqs={};                                  // dir -> shared frame set
+  function getSeq(dir){
+    if(seqs[dir]) return seqs[dir];
+    var q={dir:dir, imgs:new Array(FRAMES), loaded:0, ready:false, started:false, subs:[]};
+    seqs[dir]=q; return q;
+  }
+  function loadSeq(q){
+    if(q.started) return; q.started=true;
     for(var k=0;k<FRAMES;k++)(function(idx){
       var im=new Image(); im.decoding="async";
       im.onload=function(){
-        it.loaded++;
-        if(it.loaded===FRAMES && !it.ready){
-          it.ready=true;
-          if(it.img) it.img.style.opacity="0";   // keep it as the print/fallback layer
-          it.cv.style.display="block";
-          size(it); paint(it,it.want);
+        q.loaded++;
+        if(q.loaded===FRAMES && !q.ready){
+          q.ready=true;
+          q.subs.forEach(function(it){
+            if(it.img) it.img.style.opacity="0";
+            it.cv.style.display="block"; size(it); paint(it,it.want);
+          });
         }
       };
-      im.onerror=function(){ it.loaded++; };
-      im.src=it.dir+"f"+pad(idx+1)+".webp";
-      it.imgs[idx]=im;
+      im.onerror=function(){ q.loaded++; };
+      im.src=q.dir+"f"+pad(idx+1)+".webp";
+      q.imgs[idx]=im;
     })(k);
   }
 
+  var items=[];
+  [].forEach.call(document.querySelectorAll(".scene-media"), function(media){
+    var img=media.querySelector("img"); if(!img) return;
+    var m=/media\/img\/scene(\d)\.webp/.exec(img.getAttribute("src")||""); if(!m) return;
+    var scene=media.closest ? media.closest("section") : media.parentNode; if(!scene) return;
+    var q=getSeq("media/seq/s"+m[1]+"/");
+    var cv=document.createElement("canvas");
+    cv.className="motion-canvas"; cv.setAttribute("aria-hidden","true");
+    cv.style.cssText="position:absolute;inset:0;width:100%;height:100%;display:none;z-index:1;";
+    media.insertBefore(cv, img.nextSibling);
+    var it={scene:scene, cv:cv, ctx:cv.getContext("2d",{alpha:false}), img:img, seq:q,
+            cap:media.querySelector(".video-caption"),
+            cue:CUE_BY_SCENE[scene.id]||null, cur:-1, want:0, last:null,
+            atTop: media.getBoundingClientRect().top + window.scrollY < window.innerHeight*0.5};
+    q.subs.push(it); items.push(it);
+  });
+  if(!items.length) return;
+
   function size(it){
     var dpr=Math.min(window.devicePixelRatio||1,2);
-    var w=it.cv.clientWidth, h=it.cv.clientHeight;
-    if(!w||!h) return;
+    var w=it.cv.clientWidth, h=it.cv.clientHeight; if(!w||!h) return;
     var sc=Math.min(1, MAXW/(w*dpr));
-    it.cv.width=Math.round(w*dpr*sc); it.cv.height=Math.round(h*dpr*sc);
-    it.cur=-1;
+    it.cv.width=Math.round(w*dpr*sc); it.cv.height=Math.round(h*dpr*sc); it.cur=-1;
   }
   function paint(it,idx){
-    if(idx===it.cur||!it.imgs) return;
-    var im=it.imgs[idx]; if(!im||!im.naturalWidth) return;
+    if(idx===it.cur) return;
+    var im=it.seq.imgs[idx]; if(!im||!im.naturalWidth) return;
     it.cur=idx;
     var cw=it.cv.width, ch=it.cv.height, iw=im.naturalWidth, ih=im.naturalHeight;
     var r=Math.max(cw/iw,ch/ih), w=iw*r, h=ih*r;
@@ -3688,21 +3691,26 @@
     if(hit!==it.last){ it.last=hit; it.cap.textContent=hit; it.cap.classList.toggle("show", !!hit); }
   }
 
+  function pump(){
+    var vh=window.innerHeight, all=true;
+    for(var i=0;i<items.length;i++){
+      var it=items[i];
+      if(it.seq.started) continue;
+      all=false;
+      var r=it.scene.getBoundingClientRect();
+      if(r.top < vh*2.2 && r.bottom > -vh*1.2) loadSeq(it.seq);
+    }
+    return all;
+  }
+
   var ticking=false;
   function apply(){
     var vh=window.innerHeight;
     for(var i=0;i<items.length;i++){
-      var it=items[i];
-      if(!it.ready) continue;
+      var it=items[i]; if(!it.seq.ready) continue;
       var r=it.scene.getBoundingClientRect(), p;
-      if(it.atTop){
-        // The first scene never enters from below — at scrollY 0 the transit
-        // formula already reads half-way, so it would open mid-morph. Progress it
-        // from the moment the page loads until it has scrolled fully away.
-        p=window.scrollY/Math.max(1,r.height);
-      } else {
-        p=(vh-r.top)/(r.height+vh);
-      }
+      if(it.atTop) p=window.scrollY/Math.max(1,r.height);
+      else p=(vh-r.top)/(r.height+vh);
       if(p<-0.2||p>1.2) continue;
       p=Math.min(1,Math.max(0,p));
       if(it.cv.clientWidth){
@@ -3711,28 +3719,15 @@
         if(Math.abs(it.cv.width-it.cv.clientWidth*dpr*sc)>1) size(it);
       }
       it.want=Math.min(FRAMES-1,Math.round(p*(FRAMES-1)));
-      paint(it,it.want);
-      caption(it,p*DUR);
+      paint(it,it.want); caption(it,p*DUR);
     }
   }
-  function tick(){ if(ticking) return; ticking=true; requestAnimationFrame(function(){ pump(); apply(); ticking=false; }); }
+  function tick(){ if(ticking) return; ticking=true;
+    requestAnimationFrame(function(){ pump(); apply(); ticking=false; }); }
 
-  // Loading is driven by proximity measured in the same loop that scrubs, plus a
-  // slow self-cancelling poll. IntersectionObserver was the obvious choice but it
-  // makes loading depend on a callback that can be throttled; if it never fires the
-  // backgrounds never appear. Measuring rects costs nothing here and always runs.
-  function pump(){
-    var vh=window.innerHeight;
-    for(var i=0;i<items.length;i++){
-      var it=items[i]; if(it.started) continue;
-      var r=it.scene.getBoundingClientRect();
-      if(r.top < vh*2.2 && r.bottom > -vh*1.2) load(it);   // within ~2 screens
-    }
-    return items.every(function(x){return x.started;});
-  }
-  load(items[0]);                       // first scene starts immediately
+  loadSeq(items[0].seq);
   var poll=setInterval(function(){ if(pump()) clearInterval(poll); }, 350);
-  setTimeout(function(){ clearInterval(poll); items.forEach(load); }, 30000);  // backstop
+  setTimeout(function(){ clearInterval(poll); for(var d in seqs) loadSeq(seqs[d]); }, 30000);
 
   window.addEventListener("scroll",tick,{passive:true});
   window.addEventListener("resize",function(){ items.forEach(size); tick(); });
