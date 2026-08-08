@@ -777,6 +777,23 @@
     linear-gradient(90deg, rgba(2,2,4,.94) 0%, rgba(2,2,4,.66) 32%, rgba(2,2,4,.34) 65%, rgba(2,2,4,.5) 100%),
     linear-gradient(0deg, rgba(2,2,4,.82), rgba(2,2,4,.22) 40%, rgba(2,2,4,.34)) !important;
 }
+
+/* Figure scenes are already dark-backed, so the global .42 grade would crush the
+   light bodies. They only need a light touch to sit under white type. */
+#intro .scene-media img,
+#identity-section .scene-media img,
+#compat-reveal .scene-media img{
+  filter:brightness(1.02) saturate(1.14) contrast(1.03);
+}
+/* Text lives in the left column, so the scrim keeps its weight there and opens up
+   on the right to let the light body actually read. */
+#intro .scene-media::after,
+#identity-section .scene-media::after,
+#compat-reveal .scene-media::after{
+  background:
+    linear-gradient(90deg, rgba(2,2,4,.93) 0%, rgba(2,2,4,.58) 28%, rgba(2,2,4,.06) 58%, rgba(2,2,4,.20) 100%),
+    linear-gradient(0deg, rgba(2,2,4,.70), rgba(2,2,4,0) 38%, rgba(2,2,4,.16)) !important;
+}
 </style>
 </head>
 <body>
