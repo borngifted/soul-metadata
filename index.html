@@ -762,6 +762,21 @@
     .panel, .hero-num { opacity: 1; transform: none; }
   }
 
+
+/* ===== SOUL ENERGY: grade the friendly media for a dark UI =====
+   The replacement imagery is deliberately bright and warm. Over a dark theme with
+   white type that destroys contrast, so the media is graded down here rather than
+   re-generated darker — the warmth survives, the legibility comes back. */
+.scene-media img,
+.scene-media video,
+.scene-media canvas.motion-canvas{
+  filter:brightness(.42) saturate(1.12) contrast(1.04);
+}
+.scene-media::after{
+  background:
+    linear-gradient(90deg, rgba(2,2,4,.94) 0%, rgba(2,2,4,.66) 32%, rgba(2,2,4,.34) 65%, rgba(2,2,4,.5) 100%),
+    linear-gradient(0deg, rgba(2,2,4,.82), rgba(2,2,4,.22) 40%, rgba(2,2,4,.34)) !important;
+}
 </style>
 </head>
 <body>
@@ -795,7 +810,7 @@
 <main>
   <section class="scene" id="intro" data-chapter="01" data-chapter-title="Origin Signal">
     <div class="scene-media" aria-hidden="true">
-      <img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071048_50a9692e-75a7-4f64-be60-4f1187fb3757.png" alt="" />
+      <img src="media/img/scene1.webp" alt="" />
     </div>
     <div class="scene-inner narrow">
       <span class="kicker">Soul system 01</span>
@@ -807,7 +822,7 @@
 
   <section class="scene" id="manifesto" data-chapter="02" data-chapter-title="The Reading System">
     <div class="scene-media" aria-hidden="true">
-      <img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071048_50a9692e-75a7-4f64-be60-4f1187fb3757.png" alt="" style="filter:saturate(.55) brightness(.42) contrast(1.3);transform:scale(1.09)" />
+      <img src="media/img/scene1.webp" alt="" style="filter:saturate(.55) brightness(.42) contrast(1.3);transform:scale(1.09)" />
     </div>
     <div class="scene-grid" aria-hidden="true"></div>
     <div class="scene-inner wide">
@@ -832,9 +847,9 @@
 
   <section class="scene" id="input-panel" data-chapter="03" data-chapter-title="Decode Your Pattern">
     <div class="scene-media" aria-hidden="true">
-      <img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071140_2eeb3db5-65fd-422f-b0e4-b4eb57c51df8.png" alt="" />
-      <video class="motion-video" id="transition-input" data-play-once muted playsinline preload="auto" poster="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071048_50a9692e-75a7-4f64-be60-4f1187fb3757.png">
-        <source src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071854_6b379306-d392-465f-8ed9-a829c65be2f4.mp4" type="video/mp4" />
+      <img src="media/img/scene2.webp" alt="" />
+      <video class="motion-video" id="transition-input" data-play-once muted playsinline preload="none" poster="media/img/scene1.webp">
+        <source src="media/vid/t1.mp4" type="video/mp4" />
       </video>
       <div class="video-caption" aria-hidden="true"></div>
     </div>
@@ -873,7 +888,7 @@
   <div id="results" data-chapter="04" data-chapter-title="Decoded Profile">
     <section class="scene results-intro">
       <div class="scene-media" aria-hidden="true">
-        <img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071155_8747e2a8-7887-4629-8c1c-0aacaaee63e5.png" alt="" />
+        <img src="media/img/scene3.webp" alt="" />
       </div>
       <div class="scene-inner wide">
         <div class="hero-layout">
@@ -884,7 +899,7 @@
     </section>
 
     <section class="scene tall">
-      <div class="scene-media" aria-hidden="true"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071155_8747e2a8-7887-4629-8c1c-0aacaaee63e5.png" alt="" style="filter:brightness(.45) saturate(.7);transform:scale(1.08)" /></div>
+      <div class="scene-media" aria-hidden="true"><img src="media/img/scene3.webp" alt="" style="filter:brightness(.45) saturate(.7);transform:scale(1.08)" /></div>
       <div class="scene-inner wide">
         <section class="panel">
           <h2 class="panel-title">Core Numbers <button class="info-btn" type="button" data-info="core" aria-label="About Core Numbers">i</button></h2>
@@ -895,9 +910,9 @@
 
     <section class="scene red tall" id="identity-section">
       <div class="scene-media" aria-hidden="true">
-        <img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071208_67b2dcc7-3b64-4a54-8ac5-113f57317cfc.png" alt="" />
-        <video class="motion-video" id="transition-reading" data-play-once muted playsinline preload="auto" poster="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071155_8747e2a8-7887-4629-8c1c-0aacaaee63e5.png">
-          <source src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071955_fedd6cb2-4501-4298-9e05-7bb0f65fa4ab.mp4" type="video/mp4" />
+        <img src="media/img/scene4.webp" alt="" />
+        <video class="motion-video" id="transition-reading" data-play-once muted playsinline preload="none" poster="media/img/scene3.webp">
+          <source src="media/vid/t2.mp4" type="video/mp4" />
         </video>
         <div class="video-caption" aria-hidden="true"></div>
       </div>
@@ -916,7 +931,7 @@
     </section>
 
     <section class="scene red tall">
-      <div class="scene-media" aria-hidden="true"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071208_67b2dcc7-3b64-4a54-8ac5-113f57317cfc.png" alt="" style="filter:brightness(.52) saturate(.9);transform:scale(1.07)" /></div>
+      <div class="scene-media" aria-hidden="true"><img src="media/img/scene4.webp" alt="" style="filter:brightness(.52) saturate(.9);transform:scale(1.07)" /></div>
       <div class="scene-inner wide">
         <div class="dual-panels">
           <section class="panel">
@@ -932,7 +947,7 @@
     </section>
 
     <section class="scene tall">
-      <div class="scene-media" aria-hidden="true"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071155_8747e2a8-7887-4629-8c1c-0aacaaee63e5.png" alt="" style="filter:brightness(.34) saturate(.6);transform:scale(1.1)" /></div>
+      <div class="scene-media" aria-hidden="true"><img src="media/img/scene3.webp" alt="" style="filter:brightness(.34) saturate(.6);transform:scale(1.1)" /></div>
       <div class="scene-inner wide">
         <section class="panel">
           <h2 class="panel-title">Metadata Results <button class="info-btn" type="button" data-info="table" aria-label="About the Metadata Results table">i</button></h2>
@@ -965,9 +980,9 @@
 
   <section class="scene compat compat-reveal" id="compat-reveal" data-chapter="05" data-chapter-title="Connection Index">
     <div class="scene-media" aria-hidden="true">
-      <img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071547_4baea0c9-9405-4c7c-b1b2-26dc9ac21d5d.png" alt="" />
-      <video class="motion-video" id="transition-compat" data-play-once muted playsinline preload="auto" poster="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071208_67b2dcc7-3b64-4a54-8ac5-113f57317cfc.png">
-        <source src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_072048_238a1e65-4963-46b8-ab35-a13be161537e.mp4" type="video/mp4" />
+      <img src="media/img/scene6.webp" alt="" />
+      <video class="motion-video" id="transition-compat" data-play-once muted playsinline preload="none" poster="media/img/scene4.webp">
+        <source src="media/vid/t3.mp4" type="video/mp4" />
       </video>
       <div class="video-caption" aria-hidden="true"></div>
     </div>
@@ -982,8 +997,8 @@
 
   <section class="scene compat tall compat-form-scene" id="compat-panel">
     <div class="scene-media" aria-hidden="true">
-      <div class="compat-result-media"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071233_8fa21323-d97b-4a67-ad92-89719b8cbd5c.png" alt="" /></div>
-      <div class="compat-intro-media"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071547_4baea0c9-9405-4c7c-b1b2-26dc9ac21d5d.png" alt="" /></div>
+      <div class="compat-result-media"><img src="media/img/scene5.webp" alt="" /></div>
+      <div class="compat-intro-media"><img src="media/img/scene6.webp" alt="" /></div>
       <div class="compat-orbit" aria-hidden="true"></div>
     </div>
     <div class="scene-inner wide">
@@ -1017,7 +1032,7 @@
   </section>
 
   <section class="scene" id="closing" data-chapter="06" data-chapter-title="Transmit the Pattern">
-    <div class="scene-media" aria-hidden="true"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071233_8fa21323-d97b-4a67-ad92-89719b8cbd5c.png" alt="" style="filter:brightness(.38) saturate(.75);transform:scale(1.12)" /></div>
+    <div class="scene-media" aria-hidden="true"><img src="media/img/scene5.webp" alt="" style="filter:brightness(.38) saturate(.75);transform:scale(1.12)" /></div>
     <div class="scene-inner narrow">
       <span class="kicker">Perspective / perception / future</span>
       <h2 class="manifesto-title" style="margin-top:24px">The pattern is not a verdict.<em>It is a vantage point.</em></h2>
@@ -3581,56 +3596,134 @@
 </script>
 
 <script>
-/* ===== SOUL ENERGY: scroll controls the playhead =====
-   Converts the transition videos from play-once-on-enter to scroll-scrubbed.
-   Each video's scene maps its transit across the viewport onto currentTime, so
-   layout, captions and posters are untouched.
-   Safety: a video is only taken over once its metadata (duration) is known. If
-   metadata never arrives the original play-once behaviour is left completely
-   alone, so this can never leave a video dead. */
+/* ===== SOUL ENERGY: seamless scroll-scrubbed sequences =====
+   Seeking an <video> with currentTime is choppy: each seek decodes to the nearest
+   keyframe and, for remote files, costs a range request. Instead we preload a WebP
+   frame sequence per transition and paint it to a canvas, so every scroll position
+   is an already-decoded frame — no seeking, no network, no keyframe snapping.
+   The <video> is only hidden once its sequence is fully decoded, so a failed
+   preload degrades to the original play-once behaviour. */
 (function(){
+  var DUR = 5.04, FRAMES = 61;
+  var SEQ = [
+    {id:"transition-input",   dir:"media/seq/input/"},
+    {id:"transition-reading", dir:"media/seq/reading/"},
+    {id:"transition-compat",  dir:"media/seq/compat/"}
+  ];
+  var CUES = {
+    "transition-input":[
+      {from:0.25,to:1.75,text:"NAME IS SIGNAL."},
+      {from:1.75,to:3.35,text:"BIRTH IS RHYTHM."},
+      {from:3.35,to:5.10,text:"ENTER THE PATTERN."}],
+    "transition-reading":[
+      {from:0.20,to:1.80,text:"THE CODE OPENS."},
+      {from:1.80,to:3.45,text:"STRUCTURE BECOMES STORY."},
+      {from:3.45,to:5.10,text:"CLARITY CHANGES COLOR."}],
+    "transition-compat":[
+      {from:0.20,to:1.70,text:"ONE SIGNAL BECOMES TWO."},
+      {from:1.70,to:3.35,text:"A SECOND CURRENT ENTERS."},
+      {from:3.35,to:5.10,text:"READ THE CONNECTION."}]
+  };
+
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if(reduce) return;
-  var vids = [].slice.call(document.querySelectorAll("video[data-play-once]"));
-  if(!vids.length) return;
 
-  var active = [], ticking = false;
+  function pad(n){ n=String(n); while(n.length<3) n="0"+n; return n; }
 
-  function claim(v){
-    if(!v.duration || !isFinite(v.duration)) return;
-    if(v.__scrubbed) return;
-    var scene = v.closest ? v.closest(".scene") : null;
-    if(!scene) return;
-    v.__scrubbed = true;
-    v.setAttribute("data-played","true");   // stop the original observer autoplaying it
-    try{ v.pause(); }catch(e){}
-    active.push({v:v, scene:scene});
-    tick();
+  var items = [];
+  SEQ.forEach(function(cfg){
+    var v = document.getElementById(cfg.id); if(!v) return;
+    var media = v.parentNode; if(!media) return;
+    var scene = v.closest ? v.closest(".scene") : null; if(!scene) return;
+
+    var cv = document.createElement("canvas");
+    cv.className = "motion-canvas";
+    cv.setAttribute("aria-hidden","true");
+    cv.style.cssText = "position:absolute;inset:0;width:100%;height:100%;display:none;z-index:2;";
+    media.insertBefore(cv, v);
+
+    var it = {
+      v:v, scene:scene, cv:cv, ctx:cv.getContext("2d",{alpha:false}),
+      cap: media.querySelector(".video-caption"),
+      imgs:new Array(FRAMES), loaded:0, ready:false, cur:-1, want:0, cue:null
+    };
+    items.push(it);
+
+    for(var k=0;k<FRAMES;k++)(function(idx){
+      var im=new Image(); im.decoding="async";
+      im.onload=function(){
+        it.loaded++;
+        if(it.loaded===FRAMES && !it.ready){
+          it.ready=true;
+          it.v.setAttribute("data-played","true");   // stop original autoplay
+          try{ it.v.pause(); }catch(e){}
+          it.v.style.display="none";
+          it.cv.style.display="block";
+          size(it); paint(it, it.want);
+        }
+      };
+      im.onerror=function(){ it.loaded++; it.failed=(it.failed||0)+1; };
+      im.src=cfg.dir+"f"+pad(idx+1)+".webp";
+      it.imgs[idx]=im;
+    })(k);
+  });
+  if(!items.length) return;
+
+  var MAXW = 1600;   // cap the backing store: draw cost stays flat on any display,
+                     // and CSS scales the canvas to fill. Source frames are 1280 wide,
+                     // so going past this only upscales blur at real cost.
+  function size(it){
+    var dpr=Math.min(window.devicePixelRatio||1,2);
+    var w=it.cv.clientWidth, h=it.cv.clientHeight;
+    if(!w||!h) return;
+    var scale=Math.min(1, MAXW/(w*dpr));
+    it.cv.width=Math.round(w*dpr*scale); it.cv.height=Math.round(h*dpr*scale);
+    it.cur=-1;
+  }
+  function paint(it, idx){
+    if(idx===it.cur) return;
+    var im=it.imgs[idx];
+    if(!im||!im.naturalWidth) return;
+    it.cur=idx;
+    var cw=it.cv.width, ch=it.cv.height, iw=im.naturalWidth, ih=im.naturalHeight;
+    var r=Math.max(cw/iw,ch/ih), w=iw*r, h=ih*r;
+    it.ctx.drawImage(im,(cw-w)/2,(ch-h)/2,w,h);
+  }
+  function caption(it, tSec){
+    if(!it.cap) return;
+    var cues=CUES[it.v.id]||[], hit=null;
+    for(var i=0;i<cues.length;i++){ if(tSec>=cues[i].from && tSec<cues[i].to){ hit=cues[i]; break; } }
+    var txt = hit?hit.text:"";
+    if(txt!==it.cue){ it.cue=txt; it.cap.textContent=txt; it.cap.classList.toggle("show", !!txt); }
   }
 
+  var ticking=false;
   function apply(){
-    ticking = false;
-    var vh = window.innerHeight;
-    for(var i=0;i<active.length;i++){
-      var it=active[i], v=it.v, r=it.scene.getBoundingClientRect();
-      var p=(vh - r.top)/(r.height + vh);
-      if(p < -0.15 || p > 1.15) continue;
-      p = Math.min(1, Math.max(0, p));
-      var target = p * (v.duration - 0.05);
-      if(target >= 0 && Math.abs(v.currentTime - target) > 0.02){
-        try{ v.currentTime = target; }catch(e){}
+    ticking=false;
+    var vh=window.innerHeight;
+    for(var i=0;i<items.length;i++){
+      var it=items[i];
+      if(!it.ready) continue;
+      var r=it.scene.getBoundingClientRect();
+      var p=(vh-r.top)/(r.height+vh);
+      if(p<-0.15||p>1.15) continue;
+      p=Math.min(1,Math.max(0,p));
+      // scenes inside the results area have no box until revealed — size lazily
+      if(it.cv.clientWidth){
+        var dpr2=Math.min(window.devicePixelRatio||1,2);
+        var sc=Math.min(1, MAXW/(it.cv.clientWidth*dpr2));
+        if(Math.abs(it.cv.width - it.cv.clientWidth*dpr2*sc) > 1) size(it);
       }
+      it.want=Math.min(FRAMES-1, Math.round(p*(FRAMES-1)));
+      paint(it, it.want);
+      caption(it, p*DUR);
     }
   }
   function tick(){ if(ticking) return; ticking=true; requestAnimationFrame(apply); }
 
-  vids.forEach(function(v){
-    if(v.readyState >= 1) claim(v);
-    else v.addEventListener("loadedmetadata", function(){ claim(v); }, {once:true});
-  });
-
   window.addEventListener("scroll", tick, {passive:true});
-  window.addEventListener("resize", tick);
+  window.addEventListener("resize", function(){ items.forEach(size); tick(); });
+  tick();
 })();
 </script>
 </body>
