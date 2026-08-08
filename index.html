@@ -865,9 +865,6 @@
   <section class="scene" id="input-panel" data-chapter="03" data-chapter-title="Decode Your Pattern">
     <div class="scene-media" aria-hidden="true">
       <img src="media/img/scene2.webp" alt="" />
-      <video class="motion-video" id="transition-input" data-play-once muted playsinline preload="none" poster="media/img/scene1.webp">
-        <source src="media/vid/t1.mp4" type="video/mp4" />
-      </video>
       <div class="video-caption" aria-hidden="true"></div>
     </div>
     <div class="scene-inner">
@@ -928,9 +925,6 @@
     <section class="scene red tall" id="identity-section">
       <div class="scene-media" aria-hidden="true">
         <img src="media/img/scene4.webp" alt="" />
-        <video class="motion-video" id="transition-reading" data-play-once muted playsinline preload="none" poster="media/img/scene3.webp">
-          <source src="media/vid/t2.mp4" type="video/mp4" />
-        </video>
         <div class="video-caption" aria-hidden="true"></div>
       </div>
       <div class="scene-inner wide">
@@ -998,9 +992,6 @@
   <section class="scene compat compat-reveal" id="compat-reveal" data-chapter="05" data-chapter-title="Connection Index">
     <div class="scene-media" aria-hidden="true">
       <img src="media/img/scene6.webp" alt="" />
-      <video class="motion-video" id="transition-compat" data-play-once muted playsinline preload="none" poster="media/img/scene4.webp">
-        <source src="media/vid/t3.mp4" type="video/mp4" />
-      </video>
       <div class="video-caption" aria-hidden="true"></div>
     </div>
     <div class="scene-inner narrow">
@@ -3613,133 +3604,138 @@
 </script>
 
 <script>
-/* ===== SOUL ENERGY: seamless scroll-scrubbed sequences =====
-   Seeking an <video> with currentTime is choppy: each seek decodes to the nearest
-   keyframe and, for remote files, costs a range request. Instead we preload a WebP
-   frame sequence per transition and paint it to a canvas, so every scroll position
-   is an already-decoded frame — no seeking, no network, no keyframe snapping.
-   The <video> is only hidden once its sequence is fully decoded, so a failed
-   preload degrades to the original play-once behaviour. */
+/* ===== SOUL ENERGY: every scene background is a scrubbed transition =====
+   Each scene's background is a Kling start-frame/end-frame render that morphs that
+   scene's image into the next one's, so scrolling the page is one continuous
+   transformation and each seam lands exactly on the next scene's opening frame.
+   Frames are decoded WebP painted to canvas — no video seeking, so no stutter.
+   Sequences load lazily as their scene approaches; preloading all 366 would jank. */
 (function(){
-  var DUR = 5.04, FRAMES = 61;
-  var SEQ = [
-    {id:"transition-input",   dir:"media/seq/input/"},
-    {id:"transition-reading", dir:"media/seq/reading/"},
-    {id:"transition-compat",  dir:"media/seq/compat/"}
+  var FRAMES=61, DUR=5.04, MAXW=1600;
+  var SCENES=[
+    {sel:"#intro",                dir:"media/seq/s1/"},
+    {sel:"#input-panel",          dir:"media/seq/s2/", cue:"input"},
+    {sel:".scene.results-intro",  dir:"media/seq/s3/"},
+    {sel:"#identity-section",     dir:"media/seq/s4/", cue:"reading"},
+    {sel:"#compat-panel",         dir:"media/seq/s5/"},
+    {sel:"#compat-reveal",        dir:"media/seq/s6/", cue:"compat"}
   ];
-  var CUES = {
-    "transition-input":[
-      {from:0.25,to:1.75,text:"NAME IS SIGNAL."},
-      {from:1.75,to:3.35,text:"BIRTH IS RHYTHM."},
-      {from:3.35,to:5.10,text:"ENTER THE PATTERN."}],
-    "transition-reading":[
-      {from:0.20,to:1.80,text:"THE CODE OPENS."},
-      {from:1.80,to:3.45,text:"STRUCTURE BECOMES STORY."},
-      {from:3.45,to:5.10,text:"CLARITY CHANGES COLOR."}],
-    "transition-compat":[
-      {from:0.20,to:1.70,text:"ONE SIGNAL BECOMES TWO."},
-      {from:1.70,to:3.35,text:"A SECOND CURRENT ENTERS."},
-      {from:3.35,to:5.10,text:"READ THE CONNECTION."}]
+  var CUES={
+    input:[{f:0.25,t:1.75,x:"NAME IS SIGNAL."},{f:1.75,t:3.35,x:"BIRTH IS RHYTHM."},{f:3.35,t:5.10,x:"ENTER THE PATTERN."}],
+    reading:[{f:0.20,t:1.80,x:"THE CODE OPENS."},{f:1.80,t:3.45,x:"STRUCTURE BECOMES STORY."},{f:3.45,t:5.10,x:"CLARITY CHANGES COLOR."}],
+    compat:[{f:0.20,t:1.70,x:"ONE SIGNAL BECOMES TWO."},{f:1.70,t:3.35,x:"A SECOND CURRENT ENTERS."},{f:3.35,t:5.10,x:"READ THE CONNECTION."}]
   };
 
-  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if(reduce) return;
+  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  function pad(n){n=String(n);while(n.length<3)n="0"+n;return n;}
 
-  function pad(n){ n=String(n); while(n.length<3) n="0"+n; return n; }
+  var items=[];
+  SCENES.forEach(function(cfg){
+    var scene=document.querySelector(cfg.sel); if(!scene) return;
+    var media=scene.querySelector(".scene-media"); if(!media) return;
+    var img=media.querySelector("img");
+    var cv=document.createElement("canvas");
+    cv.className="motion-canvas"; cv.setAttribute("aria-hidden","true");
+    cv.style.cssText="position:absolute;inset:0;width:100%;height:100%;display:none;z-index:1;";
+    media.insertBefore(cv, img ? img.nextSibling : media.firstChild);
+    items.push({scene:scene, media:media, img:img, cv:cv, ctx:cv.getContext("2d",{alpha:false}),
+                dir:cfg.dir, cue:cfg.cue||null, cap:media.querySelector(".video-caption"),
+                imgs:null, loaded:0, ready:false, started:false, cur:-1, want:0, last:null,
+                atTop: scene.getBoundingClientRect().top + window.scrollY < window.innerHeight*0.5});
+  });
+  if(!items.length) return;
 
-  var items = [];
-  SEQ.forEach(function(cfg){
-    var v = document.getElementById(cfg.id); if(!v) return;
-    var media = v.parentNode; if(!media) return;
-    var scene = v.closest ? v.closest(".scene") : null; if(!scene) return;
-
-    var cv = document.createElement("canvas");
-    cv.className = "motion-canvas";
-    cv.setAttribute("aria-hidden","true");
-    cv.style.cssText = "position:absolute;inset:0;width:100%;height:100%;display:none;z-index:2;";
-    media.insertBefore(cv, v);
-
-    var it = {
-      v:v, scene:scene, cv:cv, ctx:cv.getContext("2d",{alpha:false}),
-      cap: media.querySelector(".video-caption"),
-      imgs:new Array(FRAMES), loaded:0, ready:false, cur:-1, want:0, cue:null
-    };
-    items.push(it);
-
+  function load(it){
+    if(it.started) return; it.started=true;
+    it.imgs=new Array(FRAMES);
     for(var k=0;k<FRAMES;k++)(function(idx){
       var im=new Image(); im.decoding="async";
       im.onload=function(){
         it.loaded++;
         if(it.loaded===FRAMES && !it.ready){
           it.ready=true;
-          it.v.setAttribute("data-played","true");   // stop original autoplay
-          try{ it.v.pause(); }catch(e){}
-          it.v.style.display="none";
+          if(it.img) it.img.style.opacity="0";   // keep it as the print/fallback layer
           it.cv.style.display="block";
-          size(it); paint(it, it.want);
+          size(it); paint(it,it.want);
         }
       };
-      im.onerror=function(){ it.loaded++; it.failed=(it.failed||0)+1; };
-      im.src=cfg.dir+"f"+pad(idx+1)+".webp";
+      im.onerror=function(){ it.loaded++; };
+      im.src=it.dir+"f"+pad(idx+1)+".webp";
       it.imgs[idx]=im;
     })(k);
-  });
-  if(!items.length) return;
+  }
 
-  var MAXW = 1600;   // cap the backing store: draw cost stays flat on any display,
-                     // and CSS scales the canvas to fill. Source frames are 1280 wide,
-                     // so going past this only upscales blur at real cost.
   function size(it){
     var dpr=Math.min(window.devicePixelRatio||1,2);
     var w=it.cv.clientWidth, h=it.cv.clientHeight;
     if(!w||!h) return;
-    var scale=Math.min(1, MAXW/(w*dpr));
-    it.cv.width=Math.round(w*dpr*scale); it.cv.height=Math.round(h*dpr*scale);
+    var sc=Math.min(1, MAXW/(w*dpr));
+    it.cv.width=Math.round(w*dpr*sc); it.cv.height=Math.round(h*dpr*sc);
     it.cur=-1;
   }
-  function paint(it, idx){
-    if(idx===it.cur) return;
-    var im=it.imgs[idx];
-    if(!im||!im.naturalWidth) return;
+  function paint(it,idx){
+    if(idx===it.cur||!it.imgs) return;
+    var im=it.imgs[idx]; if(!im||!im.naturalWidth) return;
     it.cur=idx;
     var cw=it.cv.width, ch=it.cv.height, iw=im.naturalWidth, ih=im.naturalHeight;
     var r=Math.max(cw/iw,ch/ih), w=iw*r, h=ih*r;
     it.ctx.drawImage(im,(cw-w)/2,(ch-h)/2,w,h);
   }
-  function caption(it, tSec){
-    if(!it.cap) return;
-    var cues=CUES[it.v.id]||[], hit=null;
-    for(var i=0;i<cues.length;i++){ if(tSec>=cues[i].from && tSec<cues[i].to){ hit=cues[i]; break; } }
-    var txt = hit?hit.text:"";
-    if(txt!==it.cue){ it.cue=txt; it.cap.textContent=txt; it.cap.classList.toggle("show", !!txt); }
+  function caption(it,tSec){
+    if(!it.cap||!it.cue) return;
+    var cues=CUES[it.cue]||[], hit="";
+    for(var i=0;i<cues.length;i++) if(tSec>=cues[i].f && tSec<cues[i].t){ hit=cues[i].x; break; }
+    if(hit!==it.last){ it.last=hit; it.cap.textContent=hit; it.cap.classList.toggle("show", !!hit); }
   }
 
   var ticking=false;
   function apply(){
-    ticking=false;
     var vh=window.innerHeight;
     for(var i=0;i<items.length;i++){
       var it=items[i];
       if(!it.ready) continue;
-      var r=it.scene.getBoundingClientRect();
-      var p=(vh-r.top)/(r.height+vh);
-      if(p<-0.15||p>1.15) continue;
-      p=Math.min(1,Math.max(0,p));
-      // scenes inside the results area have no box until revealed — size lazily
-      if(it.cv.clientWidth){
-        var dpr2=Math.min(window.devicePixelRatio||1,2);
-        var sc=Math.min(1, MAXW/(it.cv.clientWidth*dpr2));
-        if(Math.abs(it.cv.width - it.cv.clientWidth*dpr2*sc) > 1) size(it);
+      var r=it.scene.getBoundingClientRect(), p;
+      if(it.atTop){
+        // The first scene never enters from below — at scrollY 0 the transit
+        // formula already reads half-way, so it would open mid-morph. Progress it
+        // from the moment the page loads until it has scrolled fully away.
+        p=window.scrollY/Math.max(1,r.height);
+      } else {
+        p=(vh-r.top)/(r.height+vh);
       }
-      it.want=Math.min(FRAMES-1, Math.round(p*(FRAMES-1)));
-      paint(it, it.want);
-      caption(it, p*DUR);
+      if(p<-0.2||p>1.2) continue;
+      p=Math.min(1,Math.max(0,p));
+      if(it.cv.clientWidth){
+        var dpr=Math.min(window.devicePixelRatio||1,2);
+        var sc=Math.min(1, MAXW/(it.cv.clientWidth*dpr));
+        if(Math.abs(it.cv.width-it.cv.clientWidth*dpr*sc)>1) size(it);
+      }
+      it.want=Math.min(FRAMES-1,Math.round(p*(FRAMES-1)));
+      paint(it,it.want);
+      caption(it,p*DUR);
     }
   }
-  function tick(){ if(ticking) return; ticking=true; requestAnimationFrame(apply); }
+  function tick(){ if(ticking) return; ticking=true; requestAnimationFrame(function(){ pump(); apply(); ticking=false; }); }
 
-  window.addEventListener("scroll", tick, {passive:true});
-  window.addEventListener("resize", function(){ items.forEach(size); tick(); });
+  // Loading is driven by proximity measured in the same loop that scrubs, plus a
+  // slow self-cancelling poll. IntersectionObserver was the obvious choice but it
+  // makes loading depend on a callback that can be throttled; if it never fires the
+  // backgrounds never appear. Measuring rects costs nothing here and always runs.
+  function pump(){
+    var vh=window.innerHeight;
+    for(var i=0;i<items.length;i++){
+      var it=items[i]; if(it.started) continue;
+      var r=it.scene.getBoundingClientRect();
+      if(r.top < vh*2.2 && r.bottom > -vh*1.2) load(it);   // within ~2 screens
+    }
+    return items.every(function(x){return x.started;});
+  }
+  load(items[0]);                       // first scene starts immediately
+  var poll=setInterval(function(){ if(pump()) clearInterval(poll); }, 350);
+  setTimeout(function(){ clearInterval(poll); items.forEach(load); }, 30000);  // backstop
+
+  window.addEventListener("scroll",tick,{passive:true});
+  window.addEventListener("resize",function(){ items.forEach(size); tick(); });
   tick();
 })();
 </script>
