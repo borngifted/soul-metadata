@@ -761,6 +761,7 @@
     .motion-video { display: none !important; }
     .panel, .hero-num { opacity: 1; transform: none; }
   }
+
 </style>
 </head>
 <body>
@@ -832,7 +833,7 @@
   <section class="scene" id="input-panel" data-chapter="03" data-chapter-title="Decode Your Pattern">
     <div class="scene-media" aria-hidden="true">
       <img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071140_2eeb3db5-65fd-422f-b0e4-b4eb57c51df8.png" alt="" />
-      <video class="motion-video" id="transition-input" data-play-once muted playsinline preload="metadata" poster="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071048_50a9692e-75a7-4f64-be60-4f1187fb3757.png">
+      <video class="motion-video" id="transition-input" data-play-once muted playsinline preload="auto" poster="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071048_50a9692e-75a7-4f64-be60-4f1187fb3757.png">
         <source src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071854_6b379306-d392-465f-8ed9-a829c65be2f4.mp4" type="video/mp4" />
       </video>
       <div class="video-caption" aria-hidden="true"></div>
@@ -895,7 +896,7 @@
     <section class="scene red tall" id="identity-section">
       <div class="scene-media" aria-hidden="true">
         <img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071208_67b2dcc7-3b64-4a54-8ac5-113f57317cfc.png" alt="" />
-        <video class="motion-video" id="transition-reading" data-play-once muted playsinline preload="metadata" poster="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071155_8747e2a8-7887-4629-8c1c-0aacaaee63e5.png">
+        <video class="motion-video" id="transition-reading" data-play-once muted playsinline preload="auto" poster="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071155_8747e2a8-7887-4629-8c1c-0aacaaee63e5.png">
           <source src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071955_fedd6cb2-4501-4298-9e05-7bb0f65fa4ab.mp4" type="video/mp4" />
         </video>
         <div class="video-caption" aria-hidden="true"></div>
@@ -965,7 +966,7 @@
   <section class="scene compat compat-reveal" id="compat-reveal" data-chapter="05" data-chapter-title="Connection Index">
     <div class="scene-media" aria-hidden="true">
       <img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071547_4baea0c9-9405-4c7c-b1b2-26dc9ac21d5d.png" alt="" />
-      <video class="motion-video" id="transition-compat" data-play-once muted playsinline preload="metadata" poster="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071208_67b2dcc7-3b64-4a54-8ac5-113f57317cfc.png">
+      <video class="motion-video" id="transition-compat" data-play-once muted playsinline preload="auto" poster="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_071208_67b2dcc7-3b64-4a54-8ac5-113f57317cfc.png">
         <source src="https://d8j0ntlcm91z4.cloudfront.net/user_2zEV3JebDoBuH2wwwj0JVufb0T8/hf_20260805_072048_238a1e65-4963-46b8-ab35-a13be161537e.mp4" type="video/mp4" />
       </video>
       <div class="video-caption" aria-hidden="true"></div>
@@ -3576,6 +3577,60 @@
     });
   }
 
+})();
+</script>
+
+<script>
+/* ===== SOUL ENERGY: scroll controls the playhead =====
+   Converts the transition videos from play-once-on-enter to scroll-scrubbed.
+   Each video's scene maps its transit across the viewport onto currentTime, so
+   layout, captions and posters are untouched.
+   Safety: a video is only taken over once its metadata (duration) is known. If
+   metadata never arrives the original play-once behaviour is left completely
+   alone, so this can never leave a video dead. */
+(function(){
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce) return;
+  var vids = [].slice.call(document.querySelectorAll("video[data-play-once]"));
+  if(!vids.length) return;
+
+  var active = [], ticking = false;
+
+  function claim(v){
+    if(!v.duration || !isFinite(v.duration)) return;
+    if(v.__scrubbed) return;
+    var scene = v.closest ? v.closest(".scene") : null;
+    if(!scene) return;
+    v.__scrubbed = true;
+    v.setAttribute("data-played","true");   // stop the original observer autoplaying it
+    try{ v.pause(); }catch(e){}
+    active.push({v:v, scene:scene});
+    tick();
+  }
+
+  function apply(){
+    ticking = false;
+    var vh = window.innerHeight;
+    for(var i=0;i<active.length;i++){
+      var it=active[i], v=it.v, r=it.scene.getBoundingClientRect();
+      var p=(vh - r.top)/(r.height + vh);
+      if(p < -0.15 || p > 1.15) continue;
+      p = Math.min(1, Math.max(0, p));
+      var target = p * (v.duration - 0.05);
+      if(target >= 0 && Math.abs(v.currentTime - target) > 0.02){
+        try{ v.currentTime = target; }catch(e){}
+      }
+    }
+  }
+  function tick(){ if(ticking) return; ticking=true; requestAnimationFrame(apply); }
+
+  vids.forEach(function(v){
+    if(v.readyState >= 1) claim(v);
+    else v.addEventListener("loadedmetadata", function(){ claim(v); }, {once:true});
+  });
+
+  window.addEventListener("scroll", tick, {passive:true});
+  window.addEventListener("resize", tick);
 })();
 </script>
 </body>
